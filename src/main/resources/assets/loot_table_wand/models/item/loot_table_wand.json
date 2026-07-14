@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "loot_table_wand:item/loot_table_wand"
+  }
+}
