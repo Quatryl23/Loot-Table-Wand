@@ -308,7 +308,6 @@
   "gui.loot_table_wand.overlay.destroy_container": "%s zerstören",
   "gui.loot_table_wand.overlay.hide_keybinds": "Tastenbelegungen ausblenden",
   "gui.loot_table_wand.overlay.inspect_loot_table": "Beutetabelle von %s anzeigen",
-  "gui.loot_table_wand.overlay.inspect_wand_loot_table": "Beutetabelle von %s anzeigen",
   "gui.loot_table_wand.overlay.next_loot_table": "Nächste Beutetabelle",
   "gui.loot_table_wand.overlay.no_loot_table": "Keine Beutetabelle",
   "gui.loot_table_wand.overlay.open_container": "%s öffnen",
@@ -317,7 +316,6 @@
   "gui.loot_table_wand.overlay.pick_loot_table": "Beutetabelle von %s picken",
   "gui.loot_table_wand.overlay.previous_loot_table": "Vorherige Beutetabelle",
   "gui.loot_table_wand.overlay.remove_loot_table": "Beutetabelle von %s entfernen",
-  "gui.loot_table_wand.overlay.set_loot_table": "Beutetabelle an %s anhängen",
   "gui.loot_table_wand.preview_description": "Wie lange die Beutetabellenvorschau braucht, um alle Gegenstände einmal anzuzeigen",
   "gui.loot_table_wand.preview_disabled": "Vorschau deaktiviert",
   "gui.loot_table_wand.preview_duration": "Vorschaudauer:",
@@ -327,11 +325,13 @@
   "gui.loot_table_wand.synchronize_wands_description": "Ob alle Beutetabellenwerkzeuge immer denselben Slot ausgewählt haben sollen",
   "gui.loot_table_wand.tag_entry.expand_false": "Alle Gegenstände im Tag",
   "gui.loot_table_wand.tag_entry.expand_true": "Zufälliger Gegenstand im Tag",
-  "item.loot_table_wand.loot_table_wand": "Erbeutungsgegenstandsertragsübersichtstabellenwerkzeug",
+  "item.loot_table_wand.loot_table_wand": "Beutetabellenwerkzeug",
   "item.loot_table_wand.loot_table_wand.description": "Verwendet zum Anzeigen und Anhängen von Beutetabellen",
   "key.categories.loot_table_wand": "Erbeutungsgegenstandsertragsübersichtstabellenwerkzeug",
   "key.loot_table_wand.inspect_loot_table": "Beutetabelle eines Behälters untersuchen",
   "key.loot_table_wand.next_loot_table": "Zur nächsten Beutetabelle wechseln",
   "key.loot_table_wand.previous_loot_table": "Zur vorherigen Beutetabelle wechseln",
-  "key.loot_table_wand.toggle_keybind_info": "Tastenbelegungen-Hilfe umschalten"
+  "key.loot_table_wand.toggle_keybind_info": "Tastenbelegungen-Hilfe umschalten",
+  "gui.loot_table_wand.overlay.inspect_wand_loot_table": "Beutetabelle von %s anzeigen",
+  "gui.loot_table_wand.overlay.set_loot_table": "Beutetabelle an %s anhängen"
 }
