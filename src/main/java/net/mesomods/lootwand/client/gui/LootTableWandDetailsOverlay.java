@@ -96,7 +96,7 @@ public class LootTableWandDetailsOverlay implements IGuiOverlay {
         drawKeybindInfo(graphics, LootWandMod.NEXT_LOOT_TABLE_KEY.get(), "gui.loot_table_wand.overlay.next_loot_table", null, startHeight - lineHeight);
         drawKeybindInfo(graphics, LootWandMod.PREVIOUS_LOOT_TABLE_KEY.get(), "gui.loot_table_wand.overlay.previous_loot_table", null, startHeight - 2 * lineHeight);
         if (containerName == null) {
-            drawKeybindInfo(graphics, LootWandMod.INSPECT_KEY.get(), "gui.loot_table_wand.overlay.inspect_loot_table", wandName, startHeight - 3 * lineHeight);
+            drawKeybindInfo(graphics, LootWandMod.INSPECT_KEY.get(), "gui.loot_table_wand.overlay.inspect_wand_loot_table", wandName, startHeight - 3 * lineHeight);
             drawKeybindInfo(graphics, options.keyUse, "gui.loot_table_wand.overlay.open_gui", null, startHeight - 4 * lineHeight);
         } else {
             drawKeybindInfo(graphics, options.keyShift, LootWandMod.INSPECT_KEY.get(), "gui.loot_table_wand.overlay.inspect_loot_table", wandName, startHeight - 3 * lineHeight);
