@@ -9,7 +9,7 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 /**
- * @param isTag true: tag, false: loot table
+ * @param isTag true: tag, false: loottable table
  */
 public record RequestPreviewListPacket(ResourceLocation target, boolean isTag) {
 

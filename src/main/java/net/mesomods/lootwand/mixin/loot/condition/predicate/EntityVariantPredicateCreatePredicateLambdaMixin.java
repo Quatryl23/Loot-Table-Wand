@@ -1,7 +1,7 @@
 package net.mesomods.lootwand.mixin.loot.condition.predicate;
 
 
-import net.mesomods.lootwand.loot.lifoc.EntityVariantPredicateAccessor;
+import net.mesomods.lootwand.client.gui.loottable.lifoc.EntityVariantPredicateAccessor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;

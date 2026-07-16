@@ -30,28 +30,28 @@ public abstract class RandomizableContainerBlockEntityMixin extends BlockEntityM
 
     @Inject(method = "setLootTable(Lnet/minecraft/resources/ResourceLocation;J)V", at = @At("TAIL"))
     public void onSetLootTable(ResourceLocation rl, long seed, CallbackInfo ci) {
-        // Do loot table synchronization when loot table is changed on the server
+        // Do loottable table synchronization when loottable table is changed on the server
         if (this.level != null && !this.level.isClientSide)
             LootTableNetwork.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)), new SyncClientContainerLootTablePacket(this.worldPosition, rl, seed));
     }
 
     @Inject(method = "tryLoadLootTable", at = @At(value = "RETURN", ordinal = 0))
     public void onTryLoadLootTable(CallbackInfoReturnable<Boolean> cir) {
-        // Do loot table synchronization when loot table is loaded from nbt on the server, e.g. when picked container with nbt is placed down
+        // Do loottable table synchronization when loottable table is loaded from nbt on the server, e.g. when picked container with nbt is placed down
         if (this.level != null && !this.level.isClientSide)
             LootTableNetwork.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)), new SyncClientContainerLootTablePacket(this.worldPosition, this.lootTable, this.lootTableSeed));
     }
 
     @Inject(method = "unpackLootTable", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/RandomizableContainerBlockEntity;lootTable:Lnet/minecraft/resources/ResourceLocation;", opcode = Opcodes.PUTFIELD))
     public void onUnpackTable(CallbackInfo ci) {
-        // Do loot table synchronization when loot table is unpacked, e.g. when the container is opened
+        // Do loottable table synchronization when loottable table is unpacked, e.g. when the container is opened
         if (this.level != null && !this.level.isClientSide)
             LootTableNetwork.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)), new SyncClientContainerLootTablePacket(this.worldPosition, null, this.lootTableSeed));
     }
 
     @Override
     public void onLoad() {
-        // Request loot table synchronization when loaded on the client
+        // Request loottable table synchronization when loaded on the client
         if (this.level != null && this.level.isClientSide)
             LootTableNetwork.CHANNEL.sendToServer(new RequestClientContainerLootTableSyncPacket(this.worldPosition));
         super.onLoad();
