@@ -8,7 +8,7 @@ public class LootTableWandPlayerData implements ILootTableWandPlayerData {
     public static final boolean EMPTY_TARGET_CONTAINER_DEFAULT = false;
     public static final boolean SYNCHRONIZE_WANDS_DEFAULT = false;
     public static final LootTableViewMode LOOT_TABLE_VIEW_MODE_DEFAULT = LootTableViewMode.LIST;
-    public static final NumberProviderTooltipMode NUMBER_PROVIDER_TOOLTIP_MODE_DEFAULT = NumberProviderTooltipMode.ENABLED;
+    public static final NumberProviderTooltipMode NUMBER_PROVIDER_TOOLTIP_MODE_DEFAULT = NumberProviderTooltipMode.UNIFORM_DISABLED;
     public static final boolean HIDE_DEFAULTS_DEFAULT = true;
     public static final boolean COUNT_PREVIEW_DEFAULT = true;
     public static final int PREVIEW_TIME_DEFAULT = 1200;

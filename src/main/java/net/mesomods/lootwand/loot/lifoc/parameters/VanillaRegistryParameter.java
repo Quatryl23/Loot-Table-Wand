@@ -22,7 +22,7 @@ public class VanillaRegistryParameter<T extends Registry<V>, V> extends SimplePa
     protected final T registry;
 
     public VanillaRegistryParameter(@Nullable V defaultValue, String description, T registry) {
-        this(defaultValue, description, registry, (v) -> Component.literal(registry.getKey(v).toString()));
+        this(defaultValue, description, registry, (v) -> getTypeDescription(v, (value) -> Component.literal(registry.getKey(value).toString())));
     }
 
     public VanillaRegistryParameter(@Nullable V defaultValue, String description, T registry, Function<V, Component> toComponent) {

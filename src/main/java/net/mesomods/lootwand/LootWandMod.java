@@ -10,7 +10,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -63,8 +62,6 @@ public class LootWandMod {
 
     private static final Set<Thread> probabilityCalculationThreads = new HashSet<>();
     private static ExecutorService probabilityCalculationExecutor;
-
-    public static ServerLevel level;
 
     private static LootTableWandRenderer renderer;
 
@@ -147,7 +144,6 @@ public class LootWandMod {
         }
         @SubscribeEvent
         public static void onServerStarting(ServerStartingEvent event) {
-            level = event.getServer().getAllLevels().iterator().next();
             probabilityCalculationExecutor = Executors.newCachedThreadPool(s -> {
                 Thread thread = new Thread(s);
                 thread.setDaemon(true);

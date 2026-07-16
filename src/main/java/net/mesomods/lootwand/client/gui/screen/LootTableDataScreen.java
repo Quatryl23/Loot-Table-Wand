@@ -78,8 +78,8 @@ public class LootTableDataScreen extends Screen {
         if (luckSlider != null) {
             this.removeLuckSlider(luckSlider);
         }
-        LootTableNetwork.CHANNEL.sendToServer(new RequestLootTableDataPacket(location));
         lootTable = new RenderedLootTable(minecraft, this.width, this.height, LOOT_TABLE_Y0, this.height, location, viewMode);
+        LootTableNetwork.CHANNEL.sendToServer(new RequestLootTableDataPacket(location));
         closeButton = new HoverableImageButton(Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/close_screen_button.png"), ResourceLocation.parse("loot_table_wand:textures/gui/close_screen_button_hovered.png")),
                 b -> this.onClose(), TOOLTIP_CLOSE, 0, 2, 30, 16);
         viewModeToggle = new HoverableImageButton(getViewModeImages(), (button) -> {

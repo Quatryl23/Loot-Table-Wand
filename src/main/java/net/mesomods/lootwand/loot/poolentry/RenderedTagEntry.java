@@ -83,7 +83,7 @@ public class RenderedTagEntry extends PreviewCycleSingletonEntry {
         if (expand) {
             ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
             if (tagManager == null) return super.getQualityWeight(luck);
-            return tagManager.getTag(tagManager.createTagKey(tagLocation)).size() * super.getQuality();
+            return tagManager.getTag(tagManager.createTagKey(tagLocation)).size() * super.getQualityWeight(luck);
         } else {
             return super.getQualityWeight(luck);
         }
