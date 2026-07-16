@@ -25,7 +25,6 @@ import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.*;
 import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public class LootItemFunctionDefinitions {
     }
 
     public static final FunctionDefinition<ApplyBonusCountAccessor> APPLY_BONUS = new FunctionDefinition<>(ApplyBonusCountAccessor.class)
-            .registryDescriptionParameter("gui.loot_table_wand.function.apply_bonus", ForgeRegistries.ENCHANTMENTS, ApplyBonusCountAccessor::getEnchantment, ApplyBonusCountAccessor::setEnchantment)
+            .registryDescriptionParameter("gui.loot_table_wand.function.apply_bonus", BuiltInRegistries.ENCHANTMENT, ApplyBonusCountAccessor::getEnchantment, ApplyBonusCountAccessor::setEnchantment)
             .inlineMultiModeParameter(ApplyBonusCount.Formula.class, ApplyBonusCountAccessor::getFormula, ApplyBonusCountAccessor::setFormula, (formula) -> {
                 if (formula instanceof UniformBonusCountAccessor uniform) {
                     return Pair.of("gui.loot_table_wand.function.apply_bonus.uniform", List.of(new LIFOCDefinition.ParameterDefinition<>(new IntParameter(null, (String) null), (function) -> uniform.getBonusMultiplier(), (function, value) -> uniform.setBonusMultiplier(value))));
@@ -75,7 +74,7 @@ public class LootItemFunctionDefinitions {
                         if (source instanceof ContextNbtProviderAccessor) {
                             return Pair.of("gui.loot_table_wand.function.copy_nbt.context", List.of(new LIFOCDefinition.ParameterDefinition<>(new EnumParameter<>(ContextNbtProviderTarget.class, null, null, ContextNbtProviderTarget::getDescription), (provider) -> ContextNbtProviderTarget.getById(((ContextNbtProviderAccessor)provider).getGetter().getId()), (provider, value) -> ((ContextNbtProviderAccessor)provider).setGetter(((ContextNbtProviderAccessor)ContextNbtProviderAccessor.callCreateFromContext(value.id)).getGetter()))));
                         } else if (source instanceof StorageNbtProviderAccessor) {
-                            return Pair.of("gui.loot_table_wand.function.copy_nbt.storage", List.of(new LIFOCDefinition.ParameterDefinition<>(new StringParameter(null, null), (provider) -> ((StorageNbtProviderAccessor)provider).getId().toString(), (provider, string) -> ((StorageNbtProviderAccessor)provider).setId(ResourceLocation.parse(string)))));
+                            return Pair.of("gui.loot_table_wand.function.copy_nbt.storage", List.of(new LIFOCDefinition.ParameterDefinition<>(new StringParameter(null, null), (provider) -> ((StorageNbtProviderAccessor)provider).getId().toString(), (provider, string) -> ((StorageNbtProviderAccessor)provider).setId(new ResourceLocation(string)))));
                         } else {
                             return Pair.of(null, List.of());
                         }
@@ -91,12 +90,12 @@ public class LootItemFunctionDefinitions {
             )), function -> function.getOperations().stream().map(op -> (CopyOperationAccessor) op).toList(), (function, list) -> function.setOperations(list.stream().map(op -> (CopyNbtFunction.CopyOperation) op).toList()));
 
     public static final FunctionDefinition<CopyBlockStateAccessor> COPY_STATE = new FunctionDefinition<>(CopyBlockStateAccessor.class).registryDescriptionParameter(
-                    "gui.loot_table_wand.function.copy_state", ForgeRegistries.BLOCKS, CopyBlockStateAccessor::getBlock, CopyBlockStateAccessor::setBlock, Block::getName)
+                    "gui.loot_table_wand.function.copy_state", BuiltInRegistries.BLOCK, CopyBlockStateAccessor::getBlock, CopyBlockStateAccessor::setBlock, Block::getName)
             .listParameter(new LIFOCDefinition.ParameterDefinition<>(new PropertyParameter(null, null), ListParameter.Holder::get, ListParameter.Holder::set),
                     (function) -> function.getProperties().stream().map((Function<Property<?>, ListParameter.Holder<Property<?>>>) ListParameter.Holder::new).toList(), (function, holderList) -> function.setProperties(holderList.stream().map(ListParameter.Holder::get).collect(Collectors.toSet())));
 
     public static final FunctionDefinition<EnchantRandomlyFunctionAccessor> ENCHANT_RANDOMLY = new FunctionDefinition<>(EnchantRandomlyFunctionAccessor.class)
-            .listDescriptionParameter("gui.loot_table_wand.function.enchant_randomly.multiple", "gui.loot_table_wand.function.enchant_randomly.single", "gui.loot_table_wand.function.enchant_randomly.empty", new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, null, ForgeRegistries.ENCHANTMENTS), ListParameter.Holder::get, ListParameter.Holder::set), function -> function.getEnchantments().stream().map(ListParameter.Holder::new).toList(), (function, holderList) -> function.setEnchantments(holderList.stream().map(ListParameter.Holder::get).toList()));
+            .listDescriptionParameter("gui.loot_table_wand.function.enchant_randomly.multiple", "gui.loot_table_wand.function.enchant_randomly.single", "gui.loot_table_wand.function.enchant_randomly.empty", new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, null, BuiltInRegistries.ENCHANTMENT), ListParameter.Holder::get, ListParameter.Holder::set), function -> function.getEnchantments().stream().map(ListParameter.Holder::new).toList(), (function, holderList) -> function.setEnchantments(holderList.stream().map(ListParameter.Holder::get).toList()));
 
     public static final FunctionDefinition<EnchantWithLevelsFunctionAccessor> ENCHANT_WITH_LEVELS = new FunctionDefinition<>(EnchantWithLevelsFunctionAccessor.class).descriptionParameter(new NumberProviderParameter(null, "gui.loot_table_wand.function.enchant_with_levels", false), (function) -> NumberProvider.fromVanilla(function.getLevels()), (function, value) -> function.setLevels(value.toVanilla()));
 
@@ -121,11 +120,11 @@ public class LootItemFunctionDefinitions {
             .parameter(new IntParameter(0, new Parameter.Description<>(null, (limit) -> limit == 0 ? Component.translatable("gui.loot_table_wand.function.looting_enchant.limit.0") : Component.literal(Component.translatable("gui.loot_table_wand.function.looting_enchant.limit").getString().replace("##", limit.toString())))), LootingEnchantFunctionAccessor::getLimit, LootingEnchantFunctionAccessor::setLimit);
 
     public static final FunctionDefinition<FunctionReferenceAccessor> REFERENCE = new FunctionDefinition<>(FunctionReferenceAccessor.class)
-            .descriptionParameter(new StringParameter(null, "gui.loot_table_wand.function.reference"), function -> function.getName().toString(), (function, string) -> function.setName(ResourceLocation.parse(string)));
+            .descriptionParameter(new StringParameter(null, "gui.loot_table_wand.function.reference"), function -> function.getName().toString(), (function, string) -> function.setName(new ResourceLocation(string)));
 
     public static final FunctionDefinition<SetAttributesFunctionAccessor> SET_ATTRIBUTES = new FunctionDefinition<>(SetAttributesFunctionAccessor.class, Component.translatable("gui.loot_table_wand.function.set_attributes"))
             .listParameter(new LIFOCDefinition.MultiParameterDefinition<>(List.of(
-                            new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.function.set_attributes.attribute", ForgeRegistries.ATTRIBUTES), holder -> holder.get().getAttribute(), (holder, attribute) -> holder.get().setAttribute(attribute)),
+                            new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.function.set_attributes.attribute", BuiltInRegistries.ATTRIBUTE), holder -> holder.get().getAttribute(), (holder, attribute) -> holder.get().setAttribute(attribute)),
                             new LIFOCDefinition.ParameterDefinition<>(new StringParameter(null, "gui.loot_table_wand.function.set_attributes.name"), holder -> holder.get().getName(), (holder, name) -> holder.get().setName(name)),
                             new LIFOCDefinition.ParameterDefinition<>(new EnumParameter<>(AttributeModifier.Operation.class, null, "gui.loot_table_wand.function.set_attributes.operation", Map.of(
                                     AttributeModifier.Operation.ADDITION, "gui.loot_table_wand.function.set_attributes.operation.addition",
@@ -140,13 +139,13 @@ public class LootItemFunctionDefinitions {
 
     public static final FunctionDefinition<SetBannerPatternFunctionAccessor> SET_BANNER_PATTERN = new FunctionDefinition<>(SetBannerPatternFunctionAccessor.class, Component.translatable("gui.loot_table_wand.function.set_banner_pattern")).listParameter(
             new LIFOCDefinition.MultiParameterDefinition<>(List.of(
-                    new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.function.set_banner_pattern.pattern", BuiltInRegistries.BANNER_PATTERN), holder -> holder.get().getFirst().get(), (holder, value) -> holder.set(new Pair<>(Holder.direct(value), holder.get().getSecond()))),
+                    new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.function.set_banner_pattern.pattern", BuiltInRegistries.BANNER_PATTERN), holder -> holder.get().getFirst().value(), (holder, value) -> holder.set(new Pair<>(Holder.direct(value), holder.get().getSecond()))),
                     new LIFOCDefinition.ParameterDefinition<>(new EnumParameter<>(DyeColor.class, null, "gui.loot_table_wand.function.set_banner_pattern.color", (color) -> Component.literal(color.name().toLowerCase())), holder -> holder.get().getSecond(), (holder, value) -> holder.set(new Pair<>(holder.get().getFirst(), value))))),
             function -> function.getPatterns().stream().map(ListParameter.Holder::new).toList(), (function, value) -> function.setPatterns(value.stream().map(ListParameter.Holder::get).toList()))
             .hiddenByDefault();
 
     public static final FunctionDefinition<SetContainerContentsAccessor> SET_CONTENTS = new FunctionDefinition<>(SetContainerContentsAccessor.class)
-            .registryDescriptionParameter("gui.loot_table_wand.function.set_contents", ForgeRegistries.BLOCK_ENTITY_TYPES, SetContainerContentsAccessor::getType, SetContainerContentsAccessor::setType)
+            .registryDescriptionParameter("gui.loot_table_wand.function.set_contents", BuiltInRegistries.BLOCK_ENTITY_TYPE, SetContainerContentsAccessor::getType, SetContainerContentsAccessor::setType)
             .parameter(new ContentsParameter(), (function) -> function.getEntries().stream().map(entry -> RenderedLootPool.Entry.fromVanilla(entry, true)).toList(), (function, value) -> function.setEntries(value.stream().map(RenderedLootPool.Entry::toVanilla).toList()));
 
     public static final FunctionDefinition<SetItemCountFunctionAccessor> SET_COUNT = new FunctionDefinition<>(SetItemCountFunctionAccessor.class)
@@ -159,19 +158,19 @@ public class LootItemFunctionDefinitions {
             .parameter(new BooleanParameter(false, "gui.loot_table_wand.function.set_damage.add"), SetItemDamageFunctionAccessor::isAdd, SetItemDamageFunctionAccessor::setAdd);
 
     public static final FunctionDefinition<SetContainerLootTableAccessor> SET_LOOT_TABLE = new FunctionDefinition<>(SetContainerLootTableAccessor.class)
-            .descriptionParameter(new StringParameter(null, "gui.loot_table_wand.function.set_loot_table"), function -> function.getName().toString(), (function, rl) -> function.setName(ResourceLocation.parse(rl)))
-            .parameter(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.function.set_loot_table.type", ForgeRegistries.BLOCK_ENTITY_TYPES), SetContainerLootTableAccessor::getType, SetContainerLootTableAccessor::setType)
+            .descriptionParameter(new StringParameter(null, "gui.loot_table_wand.function.set_loot_table"), function -> function.getName().toString(), (function, rl) -> function.setName(new ResourceLocation(rl)))
+            .parameter(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.function.set_loot_table.type", BuiltInRegistries.BLOCK_ENTITY_TYPE), SetContainerLootTableAccessor::getType, SetContainerLootTableAccessor::setType)
             .parameter(new LongParameter((long) 0, "gui.loot_table_wand.function.set_loot_table.seed"), SetContainerLootTableAccessor::getSeed, SetContainerLootTableAccessor::setSeed);
 
     public static final FunctionDefinition<SetEnchantmentsFunctionAccessor> SET_ENCHANTMENTS = new FunctionDefinition<>(SetEnchantmentsFunctionAccessor.class, Component.translatable("gui.loot_table_wand.function.set_enchantments"))
             .listParameter(new LIFOCDefinition.InlineMultiParameterDefinition<>(List.of(
-                    new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, null, ForgeRegistries.ENCHANTMENTS), holder -> holder.get().getFirst(), (holder, enchantment) -> holder.set(new Pair<>(enchantment, holder.get().getSecond()))),
+                    new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, null, BuiltInRegistries.ENCHANTMENT), holder -> holder.get().getFirst(), (holder, enchantment) -> holder.set(new Pair<>(enchantment, holder.get().getSecond()))),
                     new LIFOCDefinition.ParameterDefinition<>(new NumberProviderParameter(null, null, false, true), holder -> NumberProvider.fromVanilla(holder.get().getSecond()), (holder, numberProvider) -> holder.set(new Pair<>(holder.get().getFirst(), numberProvider.toVanilla()))
                     )), "gui.loot_table_wand.function.set_enchantments.enchantment"), function -> function.getEnchantments().entrySet().stream().map(entry -> new ListParameter.Holder<>(new Pair<>(entry.getKey(), entry.getValue()))).toList(), (function, holderList) -> function.setEnchantments(holderList.stream().map(ListParameter.Holder::get).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))))
             .parameter(new BooleanParameter(false, "gui.loot_table_wand.function.set_enchantments.add"), SetEnchantmentsFunctionAccessor::isAdd, SetEnchantmentsFunctionAccessor::setAdd);
 
     public static final FunctionDefinition<SetInstrumentFunctionAccessor> SET_INSTRUMENT = new FunctionDefinition<>(SetInstrumentFunctionAccessor.class)
-            .descriptionParameter(new StringParameter(null, "gui.loot_table_wand.function.set_instrument"), (function) -> function.getOptions().location().toString(), (function, options) -> function.setOptions(TagKey.create(ResourceKey.createRegistryKey(ResourceLocation.parse("minecraft:instruments")), ResourceLocation.parse(options))));
+            .descriptionParameter(new StringParameter(null, "gui.loot_table_wand.function.set_instrument"), (function) -> function.getOptions().location().toString(), (function, options) -> function.setOptions(TagKey.create(ResourceKey.createRegistryKey(new ResourceLocation("minecraft:instruments")), new ResourceLocation(options))));
 
     public static final FunctionDefinition<SetLoreFunctionAccessor> SET_LORE = new FunctionDefinition<>(SetLoreFunctionAccessor.class, Component.translatable("gui.loot_table_wand.function.set_lore"))
             .listParameter(new LIFOCDefinition.ParameterDefinition<>(new StringParameter(null, null), holder -> holder.get().getString(), (holder, string) -> holder.set(Component.literal(string))),
@@ -193,12 +192,12 @@ public class LootItemFunctionDefinitions {
             });
 
     public static final FunctionDefinition<SetPotionFunctionAccessor> SET_POTION = new FunctionDefinition<>(SetPotionFunctionAccessor.class)
-            .registryDescriptionParameter("gui.loot_table_wand.function.set_potion", ForgeRegistries.POTIONS, SetPotionFunctionAccessor::getPotion, SetPotionFunctionAccessor::setPotion)
+            .registryDescriptionParameter("gui.loot_table_wand.function.set_potion", BuiltInRegistries.POTION, SetPotionFunctionAccessor::getPotion, SetPotionFunctionAccessor::setPotion)
             .hiddenByDefault();
 
     public static final FunctionDefinition<SetStewEffectFunctionAccessor> SET_STEW_EFFECT = new FunctionDefinition<>(SetStewEffectFunctionAccessor.class, Component.translatable("gui.loot_table_wand.function.set_stew_effect"))
             .listParameter(new LIFOCDefinition.InlineMultiParameterDefinition<>(List.of(
-                    new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, null, ForgeRegistries.MOB_EFFECTS), holder -> holder.get().getFirst(), (holder, effect) -> holder.set(new Pair<>(effect, holder.get().getSecond()))),
+                    new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, null, BuiltInRegistries.MOB_EFFECT), holder -> holder.get().getFirst(), (holder, effect) -> holder.set(new Pair<>(effect, holder.get().getSecond()))),
                     new LIFOCDefinition.ParameterDefinition<>(new NumberProviderParameter(null, null, false), holder -> NumberProvider.fromVanilla(holder.get().getSecond()), (holder, numberProvider) -> holder.set(new Pair<>(holder.get().getFirst(), numberProvider.toVanilla()))
                     )), "gui.loot_table_wand.function.set_stew_effect.effect"), function -> function.getEffectDurationMap().entrySet().stream().map(entry -> new ListParameter.Holder<>(new Pair<>(entry.getKey(), entry.getValue()))).toList(), (function, holderList) -> function.setEffectDurationMap(holderList.stream().map(ListParameter.Holder::get).collect(Collectors.toMap(Pair::getFirst, Pair::getSecond))));
 
@@ -233,11 +232,11 @@ public class LootItemFunctionDefinitions {
     }
 
     public static void define(String path, FunctionDefinition<?> definition) {
-        definitions.put(ResourceLocation.fromNamespaceAndPath("minecraft", path), definition);
+        definitions.put(new ResourceLocation("minecraft", path), definition);
     }
 
     public static void define(String namespace, String path, FunctionDefinition<?> definition) {
-        definitions.put(ResourceLocation.fromNamespaceAndPath(namespace, path), definition);
+        definitions.put(new ResourceLocation(namespace, path), definition);
     }
 
     public static FunctionDefinition<?> get(ResourceLocation id) {
@@ -245,11 +244,11 @@ public class LootItemFunctionDefinitions {
     }
 
     public enum ContextNbtProviderTarget {
-        THIS("gui.loot_table_wand.loot_context.this", LootContext.EntityTarget.THIS.getName()),
-        KILLER("gui.loot_table_wand.loot_context.attacker", LootContext.EntityTarget.KILLER.getName()),
-        KILLER_PLAYER("gui.loot_table_wand.loot_context.attacker_player", LootContext.EntityTarget.KILLER_PLAYER.getName()),
+        THIS("gui.loot_table_wand.loot_context.this", getName(LootContext.EntityTarget.THIS)),
+        KILLER("gui.loot_table_wand.loot_context.attacker", getName(LootContext.EntityTarget.KILLER)),
+        KILLER_PLAYER("gui.loot_table_wand.loot_context.attacker_player", getName(LootContext.EntityTarget.KILLER_PLAYER)),
         BLOCK_ENTITY("gui.loot_table_wand.loot_context.block_entity", ContextNbtProviderAccessor.getBLOCK_ENTITY_ID()),
-        DIRECT_KILLER("gui.loot_table_wand.loot_context.direct_attacker", LootContext.EntityTarget.DIRECT_KILLER.getName());
+        DIRECT_KILLER("gui.loot_table_wand.loot_context.direct_attacker", getName(LootContext.EntityTarget.DIRECT_KILLER));
 
         final String description;
         final String id;
@@ -271,6 +270,10 @@ public class LootItemFunctionDefinitions {
             }
 
             throw new IllegalArgumentException("Invalid context NBT provider target " + id);
+        }
+
+        private static String getName(LootContext.EntityTarget target) {
+            return target.name();
         }
     }
 }

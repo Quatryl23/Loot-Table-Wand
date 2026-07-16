@@ -7,9 +7,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 public record SyncClientContainerLootTablePacket(BlockPos containerPos, ResourceLocation lootTable, long seed) {
 
@@ -24,9 +21,9 @@ public record SyncClientContainerLootTablePacket(BlockPos containerPos, Resource
         return new SyncClientContainerLootTablePacket(buf.readBlockPos(), buf.readBoolean() ? null : buf.readResourceLocation(), buf.readLong());
     }
 
-    public static void handle(SyncClientContainerLootTablePacket pkt, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            ClientLevel level = Minecraft.getInstance().level;
+    public static void handle(SyncClientContainerLootTablePacket pkt, Minecraft mc) {
+        mc.execute(() -> {
+            ClientLevel level = mc.level;
             if (level == null) return;
             BlockEntity be = level.getBlockEntity(pkt.containerPos);
             if (be instanceof RandomizableContainerBlockEntity container) {
@@ -34,6 +31,5 @@ public record SyncClientContainerLootTablePacket(BlockPos containerPos, Resource
                 container.setChanged();
             }
         });
-        ctx.get().setPacketHandled(true);
     }
 }

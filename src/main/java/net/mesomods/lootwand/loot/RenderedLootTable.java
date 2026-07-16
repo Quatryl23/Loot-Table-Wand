@@ -3,7 +3,7 @@ package net.mesomods.lootwand.loot;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
 import net.mesomods.lootwand.client.ScreenUtils;
 import net.mesomods.lootwand.client.gui.LootTableViewMode;
 import net.mesomods.lootwand.loot.lifoc.RenderedCondition;
@@ -20,16 +20,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.ToDoubleFunction;
 
 public class RenderedLootTable extends ObjectSelectionList<RenderedLootTable.Pool> implements LifocParent {
-    public static final ResourceLocation SORTING_MOST = ResourceLocation.parse("loot_table_wand:textures/gui/sorting_most.png");
-    public static final ResourceLocation SORTING_LEAST = ResourceLocation.parse("loot_table_wand:textures/gui/sorting_least.png");
+    public static final ResourceLocation SORTING_MOST = new ResourceLocation("loot_table_wand:textures/gui/sorting_most.png");
+    public static final ResourceLocation SORTING_LEAST = new ResourceLocation("loot_table_wand:textures/gui/sorting_least.png");
     protected LootItemFunction[] vanillaFunctions;
     protected List<RenderedFunction> functions = new ArrayList<>();
     protected ResourceLocation randomSequence;
@@ -58,16 +59,16 @@ public class RenderedLootTable extends ObjectSelectionList<RenderedLootTable.Poo
         this.sortingMode = SortingMode.DEFAULT;
     }
 
-    public void init(LootTableAccessor lootTable) {
+    public void init(LootTable lootTable) {
         this.clearEntries();
         List<RenderedLootPool> renderedLootPools = new ArrayList<>();
-        for (LootPool pool : lootTable.getPools()) {
+        for (LootPool pool : lootTable.pools) {
             renderedLootPools.add(RenderedLootPool.fromVanilla(this, (LootPoolAccessor) pool, viewMode, playerLuck));
         }
         this.children().addAll(renderedLootPools);
-        this.vanillaFunctions = lootTable.getFunctions();
+        this.vanillaFunctions = lootTable.functions;
         this.functions = Arrays.stream(vanillaFunctions).map(RenderedFunction::fromVanilla).toList();
-        this.randomSequence = lootTable.getRandomSequence();
+        this.randomSequence = ((LootTableAccessor)lootTable).getRandomSequence();
         if (this.randomSequence != null && this.randomSequence.equals(this.tableLocation)) this.randomSequence = null;
         this.initialized = true;
         if (viewMode == LootTableViewMode.LIST) {
@@ -331,7 +332,7 @@ public class RenderedLootTable extends ObjectSelectionList<RenderedLootTable.Poo
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
-        graphics.fill(this.getLeft(), this.getTop(), this.getRight(), this.getBottom(), 0xB2000000);
+        graphics.fill(this.x0, this.y0, this.x1, this.y1, 0xB2000000);
         int i = this.getScrollbarPosition();
         int j = i + 6;
         // isMouseOver(x, y) is invalid

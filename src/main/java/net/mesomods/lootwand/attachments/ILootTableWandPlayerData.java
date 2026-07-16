@@ -1,4 +1,4 @@
-package net.mesomods.lootwand.capabilities;
+package net.mesomods.lootwand.attachments;
 
 import net.mesomods.lootwand.client.gui.LootTableViewMode;
 

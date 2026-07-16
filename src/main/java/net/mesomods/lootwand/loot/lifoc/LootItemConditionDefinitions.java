@@ -8,8 +8,6 @@ import net.mesomods.lootwand.client.ScreenUtils;
 import net.mesomods.lootwand.loot.lifoc.parameters.*;
 import net.mesomods.lootwand.loot.numbers.NumberProvider;
 import net.mesomods.lootwand.mixin.StatsScreenAccessor;
-import net.mesomods.lootwand.mixin.forge.loot.condition.CanToolPerformActionAccessor;
-import net.mesomods.lootwand.mixin.forge.loot.condition.LootTableIdConditionAccessor;
 import net.mesomods.lootwand.mixin.loot.condition.*;
 import net.mesomods.lootwand.mixin.loot.condition.predicate.*;
 import net.mesomods.lootwand.mixin.numbers.IntRangeAccessor;
@@ -42,10 +40,8 @@ import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemKilledByPlayerCondition;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +97,7 @@ public class LootItemConditionDefinitions {
 
     public static <P, T> LIFOCDefinition.InlineMultiModeParameterDefinition<P, StatType<?>> getStatDefinition(Function<P, StatAccessor<T>> supplier, BiConsumer<P, StatAccessor<?>> updater) {
         return new LIFOCDefinition.InlineMultiModeParameterDefinition<P, StatType<?>>(
-                new ForgeRegistryParameter<>(null, null, ForgeRegistries.STAT_TYPES), p -> supplier.apply(p).getType(), (p, type) -> updater.accept(p, (StatAccessor<?>) type.iterator().next()), (Function<P, Pair<String, List<LIFOCDefinition.BuildableParameterDefinition<P, ?>>>>) p -> Pair.of(null, List.of(
+                new VanillaRegistryParameter<>(null, null, BuiltInRegistries.STAT_TYPE), p -> supplier.apply(p).getType(), (p, type) -> updater.accept(p, (StatAccessor<?>) type.iterator().next()), (Function<P, Pair<String, List<LIFOCDefinition.BuildableParameterDefinition<P, ?>>>>) p -> Pair.of(null, List.of(
                     new LIFOCDefinition.ParameterDefinition<>(new ObjectParameter<>(StatAccessor.class, null, null, stat -> getStatDescription(stat, s -> Component.literal(stat.getType().getRegistry().getKey((StatAccessor<?>) s).toString()))), supplier::apply, updater::accept)
             )));
     }
@@ -112,7 +108,7 @@ public class LootItemConditionDefinitions {
     }
 
     public static final Supplier<LIFOCDefinition.MultiParameterDefinition<EnchantmentPredicateAccessor>> ENCHANTMENT_PREDICATE = () -> new LIFOCDefinition.MultiParameterDefinition<>(List.of(
-            new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.enchantment.enchantment", ForgeRegistries.ENCHANTMENTS), EnchantmentPredicateAccessor::getEnchantment, EnchantmentPredicateAccessor::setEnchantment),
+            new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.enchantment.enchantment", BuiltInRegistries.ENCHANTMENT), EnchantmentPredicateAccessor::getEnchantment, EnchantmentPredicateAccessor::setEnchantment),
             new LIFOCDefinition.ParameterDefinition<>(new MinMaxBoundsParameter<>((MinMaxBoundsAccessor<Integer>) MinMaxBoundsIntsAccessor.createInts(1, null), "gui.loot_table_wand.condition.predicate.enchantment.level", true), (predicate) -> (MinMaxBoundsAccessor<Integer>) predicate.getLevel(), (predicate, bounds) -> predicate.setLevel((MinMaxBounds.Ints) bounds))
     ));
     public static final Map<Integer, DescriptionMerger<?>> ENCHANTMENT_PREDICATE_DESCRIPTION_MERGERS = Map.of(0, DescriptionMerger.replaceDescription(null), 1, DescriptionMerger.replaceDescriptionLowercase("gui.loot_table_wand.condition.predicate.enchantment.level.single"));
@@ -120,10 +116,10 @@ public class LootItemConditionDefinitions {
     public static final Supplier<LIFOCDefinition.MultiParameterDefinition<ItemPredicateAccessor>> ITEM_PREDICATE = () -> new LIFOCDefinition.MultiParameterDefinition<>(List.of(
             new LIFOCDefinition.ParameterDefinition<>(new TagParameter<>(null, "gui.loot_table_wand.condition.predicate.item.tag"), ItemPredicateAccessor::getTag, ItemPredicateAccessor::setTag),
             new LIFOCDefinition.ListParameterDefinition<>(new ListParameter<>(Component.translatable("gui.loot_table_wand.condition.predicate.item.items"), "gui.loot_table_wand.condition.predicate.item.items.single",
-                    new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, null, ForgeRegistries.ITEMS), ListParameter.Holder::get, ListParameter.Holder::set)), ListParameter.wrapHolder(ItemPredicateAccessor::getItems), ListParameter.unwrapHolderToSet(ItemPredicateAccessor::setItems), null),
+                    new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, null, BuiltInRegistries.ITEM), ListParameter.Holder::get, ListParameter.Holder::set)), ListParameter.wrapHolder(ItemPredicateAccessor::getItems), ListParameter.unwrapHolderToSet(ItemPredicateAccessor::setItems), null),
             new LIFOCDefinition.ParameterDefinition<>(new MinMaxBoundsParameter<>(null, "gui.loot_table_wand.condition.predicate.item.count"), (predicate) -> (MinMaxBoundsAccessor<Number>) predicate.getCount(), (predicate, bounds) -> predicate.setCount((MinMaxBounds.Ints) bounds)),
             new LIFOCDefinition.ParameterDefinition<>(new MinMaxBoundsParameter<>(null, "gui.loot_table_wand.condition.predicate.item.durability"), (predicate) -> (MinMaxBoundsAccessor<Number>) predicate.getDurability(), (predicate, bounds) -> predicate.setDurability((MinMaxBounds.Ints) bounds)),
-            new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.item.potion", ForgeRegistries.POTIONS), ItemPredicateAccessor::getPotion, ItemPredicateAccessor::setPotion),
+            new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.item.potion", BuiltInRegistries.POTION), ItemPredicateAccessor::getPotion, ItemPredicateAccessor::setPotion),
             new LIFOCDefinition.ListParameterDefinition<>(new ListParameter<>(Component.translatable("gui.loot_table_wand.condition.predicate.item.enchantments"), (param) -> param.getSingleEntryIndex() == 0 ? new Parameter.Description<>("gui.loot_table_wand.condition.predicate.item.enchantments.enchantment") : null,
                     new LIFOCDefinition.NullableMultiParameterDefinition<>(null, ENCHANTMENT_PREDICATE_DESCRIPTION_MERGERS, ENCHANTMENT_PREDICATE, ListParameter.Holder::get, (EnchantmentPredicateAccessor) EnchantmentPredicate.ANY, false)), (predicate) -> Arrays.stream(predicate.getEnchantments()).map((enchant) -> new ListParameter.Holder<>((EnchantmentPredicateAccessor) enchant)).toList(), (predicate, list) -> predicate.setEnchantments((EnchantmentPredicate[]) list.stream().map((holder) -> (EnchantmentPredicate) holder.get()).toArray()), null),
             new LIFOCDefinition.ListParameterDefinition<>(new ListParameter<>(Component.translatable("gui.loot_table_wand.condition.predicate.item.stored_enchantments"), (param) -> param.getSingleEntryIndex() == 0 ? new Parameter.Description<>("gui.loot_table_wand.condition.predicate.item.stored_enchantments.enchantment") : null,
@@ -156,14 +152,14 @@ public class LootItemConditionDefinitions {
     public static final Supplier<LIFOCDefinition.MultiParameterDefinition<BlockPredicateAccessor>> BLOCK_PREDICATE = () -> new LIFOCDefinition.MultiParameterDefinition<>(List.of(
             new LIFOCDefinition.ParameterDefinition<>(new TagParameter<>(null, "gui.loot_table_wand.condition.predicate.block.tag"), BlockPredicateAccessor::getTag, BlockPredicateAccessor::setTag),
             new LIFOCDefinition.ListParameterDefinition<>(new ListParameter<>(Component.translatable("gui.loot_table_wand.condition.predicate.block.blocks"), "gui.loot_table_wand.condition.predicate.block.blocks.single",
-                    new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, null, ForgeRegistries.BLOCKS), ListParameter.Holder::get, ListParameter.Holder::set)), ListParameter.wrapHolder(BlockPredicateAccessor::getBlocks), ListParameter.unwrapHolderToSet(BlockPredicateAccessor::setBlocks), null),
+                    new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, null, BuiltInRegistries.BLOCK), ListParameter.Holder::get, ListParameter.Holder::set)), ListParameter.wrapHolder(BlockPredicateAccessor::getBlocks), ListParameter.unwrapHolderToSet(BlockPredicateAccessor::setBlocks), null),
             new LIFOCDefinition.NullableMultiParameterDefinition<>(Component.translatable("gui.loot_table_wand.condition.predicate.block.state_properties"), STATE_PROPERTIES_PREDICATE, predicate -> (StatePropertiesPredicateAccessor) predicate.getProperties(), (StatePropertiesPredicateAccessor) StatePropertiesPredicate.ANY, false),
             getNbtDefinition(BlockPredicateAccessor::getNbt, "gui.loot_table_wand.condition.predicate.block.nbt")
     ));
 
     public static final Supplier<LIFOCDefinition.MultiParameterDefinition<FluidPredicateAccessor>> FLUID_PREDICATE = () -> new LIFOCDefinition.MultiParameterDefinition<>(List.of(
             new LIFOCDefinition.ParameterDefinition<>(new TagParameter<>(null, "gui.loot_table_wand.condition.predicate.fluid.tag"), FluidPredicateAccessor::getTag, FluidPredicateAccessor::setTag),
-            new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.fluid.fluid", ForgeRegistries.FLUIDS), FluidPredicateAccessor::getFluid, FluidPredicateAccessor::setFluid),
+            new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.fluid.fluid", BuiltInRegistries.FLUID), FluidPredicateAccessor::getFluid, FluidPredicateAccessor::setFluid),
             new LIFOCDefinition.NullableMultiParameterDefinition<>(Component.translatable("gui.loot_table_wand.condition.predicate.fluid.state_properties"), STATE_PROPERTIES_PREDICATE, predicate -> (StatePropertiesPredicateAccessor) predicate.getProperties(), (StatePropertiesPredicateAccessor) StatePropertiesPredicate.ANY, false)
     ));
 
@@ -183,7 +179,7 @@ public class LootItemConditionDefinitions {
     public static final Supplier<LIFOCDefinition.MultiParameterDefinition<EntityPredicateAccessor>> ENTITY_PREDICATE = () -> new LIFOCDefinition.MultiParameterDefinition<EntityPredicateAccessor>(List.of(
             new LIFOCDefinition.InlineMultiModeParameterDefinition<>(EntityTypePredicate.class, (predicate) -> predicate.getEntityType(), (predicate, type) -> predicate.setEntityType(type), (predicate) -> {
                 if (predicate instanceof TypePredicateAccessor) {
-                    return Pair.of("gui.loot_table_wand.condition.predicate.entity.type.single", List.of(new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, null, ForgeRegistries.ENTITY_TYPES), (p) -> ((TypePredicateAccessor) p).getType(), (p, type) -> ((TypePredicateAccessor) p).setType(type))));
+                    return Pair.of("gui.loot_table_wand.condition.predicate.entity.type.single", List.of(new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, null, BuiltInRegistries.ENTITY_TYPE), (p) -> ((TypePredicateAccessor) p).getType(), (p, type) -> ((TypePredicateAccessor) p).setType(type))));
                 } else if (predicate instanceof EntityTypeTagPredicateAccessor) {
                     return Pair.of("gui.loot_table_wand.condition.predicate.entity.type.tag", List.of(new LIFOCDefinition.ParameterDefinition<>(new TagParameter<>(null, null), p -> ((EntityTypeTagPredicateAccessor) p).getTag(), (p, tag) -> ((EntityTypeTagPredicateAccessor) p).setTag(tag))));
                 } else {
@@ -199,7 +195,7 @@ public class LootItemConditionDefinitions {
             new LIFOCDefinition.NullableMultiParameterDefinition<>(Component.translatable("gui.loot_table_wand.condition.predicate.entity.stepping_on"), PREDICATE_SIMPLIFIER, LOCATION_PREDICATE, (predicate) -> (LocationPredicateAccessor) predicate.getSteppingOnLocation(), (LocationPredicateAccessor) LocationPredicate.ANY, true),
             new LIFOCDefinition.ListParameterDefinition<EntityPredicateAccessor, MultiParameter, ListParameter.Holder<Pair<MobEffect, MobEffectInstancePredicateAccessor>>>(new ListParameter<MultiParameter, ListParameter.Holder<Pair<MobEffect, MobEffectInstancePredicateAccessor>>>(Component.translatable("gui.loot_table_wand.condition.predicate.entity.mob_effects"),
                     new LIFOCDefinition.MultiParameterDefinition<>(List.of(
-                            new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.entity.mob_effects.name", ForgeRegistries.MOB_EFFECTS), (holder) -> holder.get().getFirst(), (holder, effect) -> holder.set(Pair.of(effect, holder.get().getSecond()))),
+                            new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.entity.mob_effects.name", BuiltInRegistries.MOB_EFFECT), (holder) -> holder.get().getFirst(), (holder, effect) -> holder.set(Pair.of(effect, holder.get().getSecond()))),
                             new LIFOCDefinition.ParameterDefinition<>(new MinMaxBoundsParameter<>(null, (amplifier) -> amplifier + 1, (level) -> level - 1, "gui.loot_table_wand.condition.predicate.entity.mob_effects.amplifier", true), holder -> (MinMaxBoundsAccessor<Integer>) holder.get().getSecond().getAmplifier(), (holder, bounds) -> holder.get().getSecond().setAmplifier((MinMaxBounds.Ints) bounds)),
                             new LIFOCDefinition.ParameterDefinition<>(new MinMaxBoundsParameter<>(null, (level) -> ((double) level) / 20.0, (amplifier) -> (int) amplifier.doubleValue() * 20, "gui.loot_table_wand.condition.predicate.entity.mob_effects.duration", false), holder -> (MinMaxBoundsAccessor<Integer>) holder.get().getSecond().getDuration(), (holder, bounds) -> holder.get().getSecond().setDuration((MinMaxBounds.Ints) bounds)),
                             new LIFOCDefinition.ParameterDefinition<>(new BooleanParameter(null, "gui.loot_table_wand.condition.predicate.entity.mob_effects.ambient"), holder -> holder.get().getSecond().getAmbient(), (holder, b) -> holder.get().getSecond().setAmbient(b)),
@@ -235,11 +231,11 @@ public class LootItemConditionDefinitions {
                                     new LIFOCDefinition.ParameterDefinition<ListParameter.Holder<Pair<StatAccessor<?>, MinMaxBoundsAccessor<Integer>>>, MinMaxBoundsAccessor<Integer>>(new MinMaxBoundsParameter<>(null, null), holder -> holder.get().getSecond(), (holder, bounds) -> holder.set(Pair.of(holder.get().getFirst(), bounds)))
                             ), "gui.loot_table_wand.condition.predicate.entity.sub.player.stats.stat")), sub -> ((PlayerPredicateAccessor)sub).getStats().entrySet().stream().map(entry -> new ListParameter.Holder<>((Pair<StatAccessor<?>, MinMaxBoundsAccessor<Integer>>) Pair.of((StatAccessor<?>) entry.getKey(), (MinMaxBoundsAccessor<Integer>) entry.getValue()))).toList(), (sub, list) -> ((PlayerPredicateAccessor)sub).setStats(list.stream().map(holder -> holder.get()).collect(Collectors.toMap(pair -> (Stat<?>) pair.getFirst(), pair -> (MinMaxBounds.Ints) pair.getSecond()))), null),
                             new LIFOCDefinition.ListParameterDefinition<EntitySubPredicate, InlineMultiParameter, ListParameter.Holder<Pair<ResourceLocation, Boolean>>>(new ListParameter<>(Component.translatable("gui.loot_table_wand.condition.predicate.entity.sub.player.recipes"), new LIFOCDefinition.InlineMultiParameterDefinition<>(List.of(
-                                    new LIFOCDefinition.ParameterDefinition<>(new StringParameter(null, null), holder -> holder.get().getFirst().toString(), (holder, string) -> holder.set(Pair.of(ResourceLocation.parse(string), holder.get().getSecond()))),
+                                    new LIFOCDefinition.ParameterDefinition<>(new StringParameter(null, null), holder -> holder.get().getFirst().toString(), (holder, string) -> holder.set(Pair.of(new ResourceLocation(string), holder.get().getSecond()))),
                                     new LIFOCDefinition.ParameterDefinition<>(new BooleanParameter(null, null, Component.translatable("gui.loot_table_wand.condition.predicate.entity.sub.player.recipes.recipe.true"), Component.translatable("gui.loot_table_wand.condition.predicate.entity.sub.player.recipes.recipe.false")), holder -> holder.get().getSecond(), (holder, b) -> holder.set(Pair.of(holder.get().getFirst(), b)))
                             ), "gui.loot_table_wand.condition.predicate.entity.sub.player.recipes.recipe")), sub -> ((PlayerPredicateAccessor)sub).getRecipes().object2BooleanEntrySet().stream().map((entry) -> new ListParameter.Holder<>(Pair.of(entry.getKey(), entry.getBooleanValue()))).toList(), (sub, list) -> ((PlayerPredicateAccessor)sub).setRecipes(list.stream().map(ListParameter.Holder::get).collect(Collector.of(Object2BooleanOpenHashMap::new, (map, pair) -> {if(pair.getSecond() != null) map.put(pair.getFirst(), (boolean) pair.getSecond());}, (map1, map2) -> {map1.putAll(map2); return map2;}))), null),
                             new LIFOCDefinition.ListParameterDefinition<EntitySubPredicate, InlineMultiParameter, ListParameter.Holder<Pair<ResourceLocation, PlayerPredicate.AdvancementPredicate>>>(new ListParameter<>(Component.translatable("gui.loot_table_wand.condition.predicate.entity.sub.player.advancements"), new LIFOCDefinition.InlineMultiParameterDefinition<>(List.of(
-                                    new LIFOCDefinition.ParameterDefinition<ListParameter.Holder<Pair<ResourceLocation, PlayerPredicate.AdvancementPredicate>>, String>(new StringParameter(null, null), holder -> holder.get().getFirst().toString(), (holder, string) -> holder.set(Pair.of(ResourceLocation.parse(string), holder.get().getSecond()))),
+                                    new LIFOCDefinition.ParameterDefinition<ListParameter.Holder<Pair<ResourceLocation, PlayerPredicate.AdvancementPredicate>>, String>(new StringParameter(null, null), holder -> holder.get().getFirst().toString(), (holder, string) -> holder.set(Pair.of(new ResourceLocation(string), holder.get().getSecond()))),
                                     new LIFOCDefinition.InlineMultiModeParameterDefinition<ListParameter.Holder<Pair<ResourceLocation, PlayerPredicate.AdvancementPredicate>>, PlayerPredicate.AdvancementPredicate>(PlayerPredicate.AdvancementPredicate.class, holder -> holder.get().getSecond(), (holder, advancements) -> holder.set(Pair.of(holder.get().getFirst(), advancements)), (predicate) -> {
                                         if (predicate instanceof PlayerPredicate.AdvancementDonePredicate) {
                                             return Pair.of(null, List.of(new LIFOCDefinition.ParameterDefinition<>(new BooleanParameter(null, null, Component.translatable("gui.loot_table_wand.condition.predicate.entity.sub.player.advancements.advancement.done.true"), Component.translatable("gui.loot_table_wand.condition.predicate.entity.sub.player.advancements.advancement.done.false")), p -> ((AdvancementDonePredicateAccessor)p).isState(), (p, b) -> ((AdvancementDonePredicateAccessor)p).setState(b))));
@@ -275,7 +271,7 @@ public class LootItemConditionDefinitions {
                     } else if (p.getValue() instanceof MushroomCow.MushroomType) {
                         return Pair.of(null, List.of(new LIFOCDefinition.ParameterDefinition<>(new EnumParameter<>(MushroomCow.MushroomType.class, null, "gui.loot_table_wand.condition.predicate.entity.sub.variant.mooshroom", (type) -> Component.literal(type.getSerializedName())), sub -> ((EntityVariantPredicateAccessor<MushroomCow.MushroomType>)sub).getValue(), (sub, value) -> ((EntityVariantPredicateAccessor<MushroomCow.MushroomType>)sub).setValue(value))));
                     } else if (p.getValue() instanceof Holder) {
-                        return Pair.of(null, List.of(new LIFOCDefinition.ParameterDefinition<>(new ForgeRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.entity.sub.variant.painting", ForgeRegistries.PAINTING_VARIANTS), sub -> ((EntityVariantPredicateAccessor<Holder<PaintingVariant>>)sub).getValue().get(), (sub, value) -> ((EntityVariantPredicateAccessor<Holder<PaintingVariant>>)sub).setValue(Holder.direct(value)))));
+                        return Pair.of(null, List.of(new LIFOCDefinition.ParameterDefinition<>(new VanillaRegistryParameter<>(null, "gui.loot_table_wand.condition.predicate.entity.sub.variant.painting", BuiltInRegistries.PAINTING_VARIANT), sub -> ((EntityVariantPredicateAccessor<Holder<PaintingVariant>>)sub).getValue().value(), (sub, value) -> ((EntityVariantPredicateAccessor<Holder<PaintingVariant>>)sub).setValue(Holder.direct(value)))));
                     } else if (p.getValue() instanceof Rabbit.Variant) {
                         return Pair.of(null, List.of(new LIFOCDefinition.ParameterDefinition<>(new EnumParameter<>(Rabbit.Variant.class, null, "gui.loot_table_wand.condition.predicate.entity.sub.variant.rabbit", (variant) -> Component.literal(variant.getSerializedName())), sub -> ((EntityVariantPredicateAccessor<Rabbit.Variant>)sub).getValue(), (sub, value) -> ((EntityVariantPredicateAccessor<Rabbit.Variant>)sub).setValue(value))));
                     } else if (p.getValue() instanceof Variant) {
@@ -323,7 +319,7 @@ public class LootItemConditionDefinitions {
             ), ListParameter.wrapHolderFromArray(CompositeLootItemConditionAccessor::getTerms), ListParameter.unwrapHolderToArray(CompositeLootItemConditionAccessor::setTerms), null, true);
 
     public static final ConditionDefinition<LootItemBlockStatePropertyConditionAccessor> BLOCK_STATE_PROPERTY = new ConditionDefinition<>(LootItemBlockStatePropertyConditionAccessor.class)
-            .registryDescriptionParameter("gui.loot_table_wand.condition.block_state_property", "gui.loot_table_wand.condition.block_state_property.inverted", ForgeRegistries.BLOCKS, LootItemBlockStatePropertyConditionAccessor::getBlock, LootItemBlockStatePropertyConditionAccessor::setBlock)
+            .registryDescriptionParameter("gui.loot_table_wand.condition.block_state_property", "gui.loot_table_wand.condition.block_state_property.inverted", BuiltInRegistries.BLOCK, LootItemBlockStatePropertyConditionAccessor::getBlock, LootItemBlockStatePropertyConditionAccessor::setBlock)
             .nullableMultiParameter(null, PREDICATE_SIMPLIFIER, STATE_PROPERTIES_PREDICATE, (condition) -> (StatePropertiesPredicateAccessor) condition.getProperties(), (StatePropertiesPredicateAccessor) StatePropertiesPredicate.ANY, false);
 
     public static final ConditionDefinition<DamageSourceConditionAccessor> DAMAGE_SOURCE_PROPERTIES = new ConditionDefinition<>(DamageSourceConditionAccessor.class)
@@ -362,12 +358,12 @@ public class LootItemConditionDefinitions {
                     new LIFOCDefinition.ParameterDefinition<>(new FloatParameter(0.0F, null), (condition) -> condition.getLootingMultiplier() * 100, (condition, percent) -> condition.setLootingMultiplier(percent / 100))));
 
     public static final ConditionDefinition<ConditionReferenceAccessor> REFERENCE = new ConditionDefinition<>(ConditionReferenceAccessor.class)
-            .descriptionParameter((b) -> new StringParameter(null, b ? "gui.loot_table_wand.condition.reference.inverted" : "gui.loot_table_wand.condition.reference"), condition -> condition.getName().toString(), (condition, string) -> condition.setName(ResourceLocation.parse(string)));
+            .descriptionParameter((b) -> new StringParameter(null, b ? "gui.loot_table_wand.condition.reference.inverted" : "gui.loot_table_wand.condition.reference"), condition -> condition.getName().toString(), (condition, string) -> condition.setName(new ResourceLocation(string)));
 
     public static final ConditionDefinition<ExplosionCondition> SURVIVES_EXPLOSION = new ConditionDefinition<>(ExplosionCondition.class, Component.translatable("gui.loot_table_wand.condition.survives_explosion"), Component.translatable("gui.loot_table_wand.condition.survives_explosion.inverted"));
 
     public static final ConditionDefinition<BonusLevelTableConditionAccessor> TABLE_BONUS = new ConditionDefinition<>(BonusLevelTableConditionAccessor.class)
-            .registryDescriptionParameter("gui.loot_table_wand.condition.table_bonus", "gui.loot_table_wand.condition.table_bonus.inverted", ForgeRegistries.ENCHANTMENTS, BonusLevelTableConditionAccessor::getEnchantment, BonusLevelTableConditionAccessor::setEnchantment)
+            .registryDescriptionParameter("gui.loot_table_wand.condition.table_bonus", "gui.loot_table_wand.condition.table_bonus.inverted", BuiltInRegistries.ENCHANTMENT, BonusLevelTableConditionAccessor::getEnchantment, BonusLevelTableConditionAccessor::setEnchantment)
             .listParameter(null, new LIFOCDefinition.ParameterDefinition<>(new FloatParameter(null, "gui.loot_table_wand.condition.table_bonus.value"), ListParameter.Holder::get, ListParameter.Holder::set), ListParameter.wrapHolderFromFloatArrayTimes100(BonusLevelTableConditionAccessor::getValues), ListParameter.unwrapHolderToFloatArrayOver100(BonusLevelTableConditionAccessor::setValues), null, (index) -> index == 0 ? Component.translatable("gui.loot_table_wand.condition.table_bonus.value.level_0").getString() : Component.translatable("gui.loot_table_wand.condition.table_bonus.value.level", ScreenUtils.formatInt(index, true)).getString());
 
     public static final ConditionDefinition<TimeCheckAccessor> TIME_CHECK = new ConditionDefinition<>(TimeCheckAccessor.class)
@@ -384,14 +380,6 @@ public class LootItemConditionDefinitions {
             .inlineMultiDescriptionParameter("gui.loot_table_wand.condition.value_check", "gui.loot_table_wand.condition.value_check.inverted", List.of(
                     new LIFOCDefinition.ParameterDefinition<>(new NumberProviderParameter(null, null, false), condition -> NumberProvider.fromVanilla(condition.getProvider()), (condition, provider) -> condition.setProvider(provider.toVanilla())),
                     new LIFOCDefinition.ParameterDefinition<>(new IntRangeParameter(null, null, false), condition -> (IntRangeAccessor) condition.getRange(), (condition, range) -> condition.setRange((IntRange) range))));
-
-
-    // FORGE CONDITIONS
-    public static final ConditionDefinition<LootTableIdConditionAccessor> FORGE_LOOT_TABLE_ID = new ConditionDefinition<>(LootTableIdConditionAccessor.class)
-            .descriptionParameter(b -> new StringParameter(null, b ? "gui.loot_table_wand.condition.forge.loot_table_id.inverted" : "gui.loot_table_wand.condition.forge.loot_table_id"), (condition) -> condition.getTargetLootTableId().toString(), (condition, string) -> condition.setTargetLootTableId(ResourceLocation.parse(string)));
-
-    public static final ConditionDefinition<CanToolPerformActionAccessor> FORGE_CAN_TOOL_PERFORM_ACTION = new ConditionDefinition<>(CanToolPerformActionAccessor.class)
-            .descriptionParameter(b -> new StringParameter(null, b ? "gui.loot_table_wand.condition.forge.can_tool_perform_action.inverted" : "gui.loot_table_wand.condition.forge.can_tool_perform_action"), (condition) -> condition.getAction().name(), (condition, string) -> condition.setAction(ToolAction.get(string)));
 
     static {
         entityPredicate = ENTITY_PREDICATE;
@@ -413,17 +401,14 @@ public class LootItemConditionDefinitions {
         define("time_check", TIME_CHECK);
         define("weather_check", WEATHER_CHECK);
         define("value_check", VALUE_CHECK);
-        // FORGE CONDITIONS
-        define("forge", "loot_table_id", FORGE_LOOT_TABLE_ID);
-        define("forge", "can_tool_perform_action", FORGE_CAN_TOOL_PERFORM_ACTION);
     }
 
     public static void define(String path, ConditionDefinition<?> definition) {
-        definitions.put(ResourceLocation.fromNamespaceAndPath("minecraft", path), definition);
+        definitions.put(new ResourceLocation("minecraft", path), definition);
     }
 
     public static void define(String namespace, String path, ConditionDefinition<?> definition) {
-        definitions.put(ResourceLocation.fromNamespaceAndPath(namespace, path), definition);
+        definitions.put(new ResourceLocation(namespace, path), definition);
     }
 
     public static ConditionDefinition<?> get(ResourceLocation id) {

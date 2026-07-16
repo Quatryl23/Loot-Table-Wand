@@ -1,9 +1,10 @@
 package net.mesomods.lootwand.client.gui.screen;
 
-import net.mesomods.lootwand.LootWandMod;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.ModItems;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
 import net.mesomods.lootwand.client.LootTableWandRenderer;
 import net.mesomods.lootwand.client.ScreenUtils;
+import net.mesomods.lootwand.client.tooltip.AdvancedTooltipAbstractWidget;
 import net.mesomods.lootwand.item.LootTableWandItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,14 +18,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
 public class LootTableWandScreen extends Screen {
     private static final Component DEFAULT_MESSAGE = Component.translatable("gui.loot_table_wand.no_table_set");
     private static final Component DEFAULT_TOOLTIP = Component.translatable("gui.loot_table_wand.set_loot_table");
@@ -45,7 +43,7 @@ public class LootTableWandScreen extends Screen {
     }
 
     public void validateItem() {
-        if (!player.getInventory().getItem(inventorySlot).is(LootWandMod.LOOT_TABLE_WAND.get())) {
+        if (!player.getInventory().getItem(inventorySlot).is(ModItems.LOOT_TABLE_WAND)) {
             this.onClose();
         }
     }
@@ -56,7 +54,7 @@ public class LootTableWandScreen extends Screen {
 
     @Override
     protected void init() {
-        if (!player.getInventory().getItem(inventorySlot).is(LootWandMod.LOOT_TABLE_WAND.get())) super.onClose();
+        if (!player.getInventory().getItem(inventorySlot).is(ModItems.LOOT_TABLE_WAND)) super.onClose();
         this.validateItem();
         activeIndex = LootTableWandItem.getActiveLootTableIndex(this.getItem());
         lootTableButtons = new ArrayList<>();
@@ -121,7 +119,7 @@ public class LootTableWandScreen extends Screen {
         if (index == -1)
             return;
         RightClickableButton button = lootTableButtons.get(index);
-        button.clearFGColor();
+        ((AdvancedTooltipAbstractWidget)button).lootmod$setStringColor(-1);
         button.setFocused(false);
     }
 
@@ -129,7 +127,7 @@ public class LootTableWandScreen extends Screen {
         if (index == -1)
             return;
         RightClickableButton button = lootTableButtons.get(index);
-        button.setFGColor(5635925); // ChatFormatting.GREEN
+        ((AdvancedTooltipAbstractWidget)button).lootmod$setStringColor(5635925); // ChatFormatting.GREEN
         button.setFocused(true);
     }
 

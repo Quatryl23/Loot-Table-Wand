@@ -1,8 +1,8 @@
 package net.mesomods.lootwand.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
-import net.mesomods.lootwand.capabilities.NumberProviderTooltipMode;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.attachments.NumberProviderTooltipMode;
 import net.mesomods.lootwand.client.gui.screen.LootTableDataScreen;
 import net.mesomods.lootwand.client.tooltip.AdvancedTooltipAbstractWidget;
 import net.mesomods.lootwand.client.tooltip.AdvancedTooltipGuiGraphics;
@@ -13,15 +13,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.List;
 
-
-@OnlyIn(Dist.CLIENT)
 public class ScreenUtils {
     public static final Font FONT = Minecraft.getInstance().font;
     public static final DecimalFormat NUMBER_PROVIDER_FORMAT;

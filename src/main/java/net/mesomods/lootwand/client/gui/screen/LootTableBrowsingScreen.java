@@ -1,6 +1,6 @@
 package net.mesomods.lootwand.client.gui.screen;
 
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
 import net.mesomods.lootwand.client.gui.LootTableSelectionList;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.mesomods.lootwand.network.packet.client.RequestLootTablesPacket;
@@ -13,14 +13,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-@OnlyIn(Dist.CLIENT)
 public class LootTableBrowsingScreen extends Screen {
 	private final LootTableWandScreen backgroundGui;
 	private final Player player;
@@ -70,14 +67,14 @@ public class LootTableBrowsingScreen extends Screen {
 			if (selectedLootTable == null) return;
 			String selectedLootTableLocation = buildNewLocation(selectedLootTable);
             if (ResourceLocation.isValidResourceLocation(selectedLootTableLocation)) {
-                ResourceLocation location = ResourceLocation.parse(selectedLootTableLocation);
+                ResourceLocation location = new ResourceLocation(selectedLootTableLocation);
                 LootTableWandPlayerDataManager.saveLocation(player, viewedResourceLocation);
 				this.scrollAmount = selectionList.getScrollAmount();
                 minecraft.setScreen(new LootTableDataScreen(location, this, player));
             }
         }).size(100, 20).pos(this.width - 105, this.height - 25).build();
 		if (allLootTables == null) {
-			LootTableNetwork.CHANNEL.sendToServer(new RequestLootTablesPacket());
+			LootTableNetwork.sendToServer(new RequestLootTablesPacket());
 		} else {
 			reloadResourceLocation();
 		}
@@ -119,7 +116,7 @@ public class LootTableBrowsingScreen extends Screen {
 					if (!availablePaths.contains(lootTableNamespace)) {
 					availablePaths.add(lootTableNamespace);
 					}
-				}			
+				}
 			}
 		} else if (!viewedResourceLocation.contains(":")) {
 			namespace = viewedResourceLocation;

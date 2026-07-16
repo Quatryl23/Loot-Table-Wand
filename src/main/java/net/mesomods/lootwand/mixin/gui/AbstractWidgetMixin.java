@@ -6,14 +6,20 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(net.minecraft.client.gui.components.AbstractWidget.class)
 public abstract class AbstractWidgetMixin implements AdvancedTooltipAbstractWidget {
+    @Shadow
+    protected int height;
     @Unique
     boolean lootmod$advancedTooltips = false;
+    @Unique // only works on AbstractButton
+    int stringColor = -1;
+
 
     @Redirect(method = "updateTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;setTooltipForNextRenderPass(Lnet/minecraft/client/gui/components/Tooltip;Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Z)V"))
     private void redirectToBetterTooltip(Screen screen, Tooltip tooltip, ClientTooltipPositioner positioner, boolean isFocused) {
@@ -22,6 +28,24 @@ public abstract class AbstractWidgetMixin implements AdvancedTooltipAbstractWidg
         } else {
             screen.setTooltipForNextRenderPass(tooltip, positioner, isFocused);
         }
+    }
+
+    @Unique
+    @Override
+    public void lootmod$setStringColor(int stringColor) {
+        this.stringColor = stringColor;
+    }
+
+    @Unique
+    @Override
+    public int lootmod$getStringColor() {
+        return this.stringColor;
+    }
+
+    @Unique
+    @Override
+    public void lootmod$setHeight(int height) {
+        this.height = height;
     }
 
     @Unique

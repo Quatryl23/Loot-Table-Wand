@@ -1,11 +1,11 @@
 package net.mesomods.lootwand.network.packet.server;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemPreviewListPacket {
     protected final int[] times;
@@ -23,7 +23,7 @@ public class ItemPreviewListPacket {
             if (tag instanceof StringTag stringTag) {
                 buf.writeUtf(stringTag.getAsString());
             } else {
-                buf.writeUtf(ForgeRegistries.ITEMS.getKey(Items.AIR).toString());
+                buf.writeUtf(BuiltInRegistries.ITEM.getKey(Items.AIR).toString());
             }
         }
     }

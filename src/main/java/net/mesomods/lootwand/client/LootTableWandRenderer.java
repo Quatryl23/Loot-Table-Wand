@@ -1,16 +1,17 @@
 package net.mesomods.lootwand.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerData;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerData;
 import net.mesomods.lootwand.item.LootTableWandItem;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.mesomods.lootwand.network.packet.client.UpdateLootTableWandPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StringTag;
@@ -20,16 +21,12 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+public class LootTableWandRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+    public static final LootTableWandRenderer INSTANCE = new LootTableWandRenderer();
 
-@OnlyIn(Dist.CLIENT)
-public class LootTableWandRenderer extends BlockEntityWithoutLevelRenderer {
-    public LootTableWandRenderer() {
-        super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+    private LootTableWandRenderer() {
     }
 
     // -2 : Preview entirely disabled
@@ -38,7 +35,7 @@ public class LootTableWandRenderer extends BlockEntityWithoutLevelRenderer {
     public static int PREVIEW_CYCLE_TIME = LootTableWandPlayerData.PREVIEW_TIME_DEFAULT;
 
     @Override
-    public void renderByItem(ItemStack itemStack, ItemDisplayContext context, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
+    public void render(ItemStack itemStack, ItemDisplayContext context, PoseStack poseStack, MultiBufferSource bufferSource, int combinedLight, int combinedOverlay) {
         if (PREVIEW_CYCLE_TIME == -1) return;
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
@@ -61,7 +58,7 @@ public class LootTableWandRenderer extends BlockEntityWithoutLevelRenderer {
         }
         // Check nbt for preview data (rendered item, time until next item)
         if (nbt.contains("PreviewTimeStart") && nbt.contains("PreviewTimeEnd") && nbt.contains("PreviewItem") && timeInCyclePerMillion > nbt.getInt("PreviewTimeStart") && timeInCyclePerMillion < nbt.getInt("PreviewTimeEnd")) {
-            return ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(nbt.getString("PreviewItem")));
+            return BuiltInRegistries.ITEM.get(new ResourceLocation(nbt.getString("PreviewItem")));
         } else {
             int[] previewTimes = nbt.getIntArray("PreviewTimes");
             for (int i = 0; i < previewTimes.length; i++) {
@@ -73,9 +70,9 @@ public class LootTableWandRenderer extends BlockEntityWithoutLevelRenderer {
                     String previewItemString = nbt.getList("PreviewItems", Tag.TAG_STRING).getString(i);
                     nbt.put("PreviewItem", StringTag.valueOf(previewItemString));
                     if (mc.player != null && mc.player.getInventory().items.contains(stack)) {
-                        LootTableNetwork.CHANNEL.sendToServer(UpdateLootTableWandPacket.updatePreview(mc.player.getInventory().items.indexOf(stack), startTime, endTime, previewItemString));
+                        LootTableNetwork.sendToServer(UpdateLootTableWandPacket.updatePreview(mc.player.getInventory().items.indexOf(stack), startTime, endTime, previewItemString));
                     }
-                    return ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(previewItemString));
+                    return BuiltInRegistries.ITEM.get(new ResourceLocation(previewItemString));
                 }
             }
         }

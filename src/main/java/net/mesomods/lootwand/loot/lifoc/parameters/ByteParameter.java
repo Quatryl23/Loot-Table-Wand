@@ -1,6 +1,7 @@
 package net.mesomods.lootwand.loot.lifoc.parameters;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;

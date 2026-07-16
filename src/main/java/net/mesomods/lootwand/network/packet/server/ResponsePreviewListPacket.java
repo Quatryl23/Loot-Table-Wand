@@ -10,10 +10,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 public class ResponsePreviewListPacket extends ItemPreviewListPacket {
     private final ResourceLocation id;
@@ -38,16 +34,14 @@ public class ResponsePreviewListPacket extends ItemPreviewListPacket {
         return new ResponsePreviewListPacket(id, packet.times, packet.items, isTag);
     }
 
-    public static void handle(ResponsePreviewListPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            if (ctx.get().getDirection().getReceptionSide().isServer()) return;
-            Screen activeScreen = Minecraft.getInstance().screen;
+    public static void handle(ResponsePreviewListPacket packet, Minecraft mc) {
+        mc.execute(() -> {
+            Screen activeScreen = mc.screen;
             if (activeScreen == null) return;
             if (activeScreen instanceof LootTableDataScreen dataScreen) {
                 dataScreen.acceptPreviewList(packet.id, packet.times, packet.items, packet.isTag);
             }
         });
-        ctx.get().setPacketHandled(true);
     }
 
     public static void sendLootTablePreview(ServerPlayer player, ResourceLocation lootTableLocation) {
@@ -64,7 +58,7 @@ public class ResponsePreviewListPacket extends ItemPreviewListPacket {
             previewItems = previewList.getSecond();
         }
 
-        LootTableNetwork.CHANNEL.sendTo(new ResponsePreviewListPacket(lootTableLocation, previewTimes, previewItems, false), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        LootTableNetwork.sendToClient(player, new ResponsePreviewListPacket(lootTableLocation, previewTimes, previewItems, false));
 
     }
 
@@ -82,7 +76,7 @@ public class ResponsePreviewListPacket extends ItemPreviewListPacket {
             previewItems = previewList.getSecond();
         }
 
-        LootTableNetwork.CHANNEL.sendTo(new ResponsePreviewListPacket(tagLocation, previewTimes, previewItems, true), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        LootTableNetwork.sendToClient(player, new ResponsePreviewListPacket(tagLocation, previewTimes, previewItems, true));
 
     }
 }

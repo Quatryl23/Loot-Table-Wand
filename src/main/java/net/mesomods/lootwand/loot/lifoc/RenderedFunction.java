@@ -9,14 +9,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
+
 public class RenderedFunction extends RenderedLIFOC {
     public static final MutableComponent DESCRIPTION_PREFIX = Component.literal("• ");
     final List<RenderedCondition> conditions;

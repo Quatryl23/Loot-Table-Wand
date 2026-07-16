@@ -7,6 +7,8 @@ import net.mesomods.lootwand.mixin.loot.entry.TagEntryAccessor;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.mesomods.lootwand.network.packet.client.RequestPreviewListPacket;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -18,10 +20,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITagManager;
 
 import java.util.List;
+import java.util.Optional;
 
 public class RenderedTagEntry extends PreviewCycleSingletonEntry {
     public static final ItemStack DEFAULT_SYMBOL = new ItemStack(Items.NAME_TAG);
@@ -37,7 +38,7 @@ public class RenderedTagEntry extends PreviewCycleSingletonEntry {
         this.expand = expand;
         this.updateDescription();
         this.updateHeight(false);
-        LootTableNetwork.CHANNEL.sendToServer(new RequestPreviewListPacket(tagLocation, true));
+        LootTableNetwork.sendToServer(new RequestPreviewListPacket(tagLocation, true));
     }
 
     @Override
@@ -51,7 +52,7 @@ public class RenderedTagEntry extends PreviewCycleSingletonEntry {
     public void acceptPreviewList(ResourceLocation location, int[] previewTimes, ListTag previewItems, boolean isTag) {
         if (isTag && location.equals(this.tagLocation)) {
             this.previewTimes = previewTimes;
-            this.previewItems = previewItems.stream().map(tag -> ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(tag.getAsString()))).map(item -> item == null ? ItemStack.EMPTY : item.getDefaultInstance()).toList();
+            this.previewItems = previewItems.stream().map(tag -> BuiltInRegistries.ITEM.get(new ResourceLocation(tag.getAsString()))).map(Item::getDefaultInstance).toList();
             this.previewReady = true;
         }
     }
@@ -59,9 +60,9 @@ public class RenderedTagEntry extends PreviewCycleSingletonEntry {
     @Override
     public int getWeight() {
         if (expand) {
-            ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
-            if (tagManager == null) return super.getWeight();
-            return tagManager.getTag(tagManager.createTagKey(tagLocation)).size() * super.getWeight();
+            TagKey<Item> key = TagKey.create(BuiltInRegistries.ITEM.key(), tagLocation);
+            Optional<HolderSet.Named<Item>> optional = BuiltInRegistries.ITEM.getTag(key);
+            return optional.map(holders -> holders.size() * super.getWeight()).orElseGet(super::getWeight);
         } else {
            return super.getWeight();
         }
@@ -70,9 +71,9 @@ public class RenderedTagEntry extends PreviewCycleSingletonEntry {
     @Override
     public int getQuality() {
         if (expand) {
-            ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
-            if (tagManager == null) return super.getQuality();
-            return tagManager.getTag(tagManager.createTagKey(tagLocation)).size() * super.getQuality();
+            TagKey<Item> key = TagKey.create(BuiltInRegistries.ITEM.key(), tagLocation);
+            Optional<HolderSet.Named<Item>> optional = BuiltInRegistries.ITEM.getTag(key);
+            return optional.map(holders -> holders.size() * super.getQuality()).orElseGet(super::getQuality);
         } else {
             return super.getQuality();
         }
@@ -81,9 +82,9 @@ public class RenderedTagEntry extends PreviewCycleSingletonEntry {
     @Override
     public int getQualityWeight(double luck) {
         if (expand) {
-            ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
-            if (tagManager == null) return super.getQualityWeight(luck);
-            return tagManager.getTag(tagManager.createTagKey(tagLocation)).size() * super.getQuality();
+            TagKey<Item> key = TagKey.create(BuiltInRegistries.ITEM.key(), tagLocation);
+            Optional<HolderSet.Named<Item>> optional = BuiltInRegistries.ITEM.getTag(key);
+            return optional.map(holders -> holders.size() * super.getQualityWeight(luck)).orElseGet(() -> super.getQualityWeight(luck));
         } else {
             return super.getQualityWeight(luck);
         }

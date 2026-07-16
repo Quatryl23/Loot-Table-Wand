@@ -8,7 +8,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -17,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Mixin(GuiGraphics.class)
 public abstract class GuiGraphicsMixin implements AdvancedTooltipGuiGraphics {
@@ -24,12 +24,9 @@ public abstract class GuiGraphicsMixin implements AdvancedTooltipGuiGraphics {
     boolean lootmod$isFirstTooltipComponent;
     @Unique
     boolean lootmod$tooltipGap = true;
+
     @Shadow
-    public abstract int guiWidth();
-    @Shadow
-    public abstract int guiHeight();
-    @Shadow
-    protected abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> tooltips, int x, int y, ClientTooltipPositioner positioner);
+    protected abstract void renderTooltipInternal(Font font, List<ClientTooltipComponent> list, int i, int j, ClientTooltipPositioner clientTooltipPositioner);
 
     @Unique
     @Override
@@ -37,7 +34,8 @@ public abstract class GuiGraphicsMixin implements AdvancedTooltipGuiGraphics {
         if (tooltip.isEmpty()) {
             tooltip = Optional.of(new LoadingProbabilityChartTooltip());
         }
-        List<ClientTooltipComponent> list = net.minecraftforge.client.ForgeHooksClient.gatherTooltipComponents(ItemStack.EMPTY, components, tooltip, x, guiWidth(), guiHeight(), font);
+        List<ClientTooltipComponent> list = components.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Collectors.toList());
+        tooltip.ifPresent((c) -> list.add(1, ClientTooltipComponent.create(c)));
         this.renderTooltipInternal(font, list, x, y, positioner);
     }
 

@@ -2,6 +2,7 @@ package net.mesomods.lootwand.loot;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
+import net.mesomods.lootwand.LootWandMod;
 import net.mesomods.lootwand.client.ScreenUtils;
 import net.mesomods.lootwand.client.gui.LootTableViewMode;
 import net.mesomods.lootwand.client.gui.screen.LootTableDataScreen;
@@ -9,6 +10,7 @@ import net.mesomods.lootwand.client.tooltip.AdvancedTooltipScreen;
 import net.mesomods.lootwand.loot.lifoc.RenderedCondition;
 import net.mesomods.lootwand.loot.lifoc.RenderedFunction;
 import net.mesomods.lootwand.loot.poolentry.RenderedCompositeEntry;
+import net.mesomods.lootwand.mixin.fabric.AbstractSliderButtonAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,7 +29,7 @@ import java.util.function.UnaryOperator;
 
 public class RenderedCumulatedLootPool extends RenderedLootTable.Pool {
     public static final Tooltip CONDITION_WARNING = Tooltip.create(Component.translatable("gui.loot_table_wand.loot_table.tooltip.condition_warning"));
-    public static final ResourceLocation WARNING_ICON = ResourceLocation.parse("forge:textures/gui/experimental_warning.png");
+    public static final ResourceLocation WARNING_ICON = new ResourceLocation(LootWandMod.MODID, "textures/gui/warning.png");
     protected LuckSlider luckSlider;
     protected List<RenderedLootPool> cumulatedPools = new ArrayList<>();
     protected List<Entry> cumulatedEntries = new ArrayList<>();
@@ -83,7 +85,7 @@ public class RenderedCumulatedLootPool extends RenderedLootTable.Pool {
         graphics.drawString(FONT, Component.translatable("gui.loot_table_wand.loot_table.luck", ScreenUtils.DOUBLE_FORMAT.format(luck)), left + 5, top + 2, 0xFFFFFF);
         this.positionLuckSlider(left + 75, top, width - 100);
         if (lootDepends) {
-            graphics.blit(WARNING_ICON, left + width - 20, top - 2, 0, 8, 9, 16, 14, 32, 32);
+            graphics.blit(WARNING_ICON, left + width - 20, top - 3, 0, 0, 0, 16, 16, 16, 16);
             if (mouseX >= left + width - 20 && mouseX < left + width - 4 && mouseY >= top - 2 && mouseY < top + 12) {
                 Screen screen = Minecraft.getInstance().screen;
                 if (screen instanceof AdvancedTooltipScreen s) s.lootmod$setNoGapTooltipForNextRenderPass(CONDITION_WARNING, LootTableDataScreen.TOOLTIP_POSITIONER);
@@ -239,6 +241,7 @@ public class RenderedCumulatedLootPool extends RenderedLootTable.Pool {
     }
 
     public class LuckSlider extends AbstractSliderButton {
+        public static final ResourceLocation SLIDER_LOCATION = AbstractSliderButtonAccessor.getSLIDER_LOCATION();
         public static float STEP_SIZE = 1.0f/560;
         float luck;
 
@@ -304,8 +307,8 @@ public class RenderedCumulatedLootPool extends RenderedLootTable.Pool {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.enableDepthTest();
-            graphics.blitNineSliced(SLIDER_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, this.getTextureY());
-            graphics.blitNineSliced(SLIDER_LOCATION, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 10, 20, 4, 200, 20, 0, this.getHandleTextureY());
+            graphics.blitNineSliced(SLIDER_LOCATION, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 200, 20, 0, ((AbstractSliderButtonAccessor)this).callGetTextureY());
+            graphics.blitNineSliced(SLIDER_LOCATION, this.getX() + (int)(this.value * (double)(this.width - 8)), this.getY(), 8, 10, 20, 4, 200, 20, 0, ((AbstractSliderButtonAccessor)this).callGetHandleTextureY());
             graphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
             int i = this.active ? 16777215 : 10526880;
             this.renderScrollingString(graphics, minecraft.font, 2, i | Mth.ceil(this.alpha * 255.0F) << 24);

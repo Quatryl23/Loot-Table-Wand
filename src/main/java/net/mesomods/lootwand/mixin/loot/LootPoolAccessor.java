@@ -24,8 +24,4 @@ public interface LootPoolAccessor {
 
     @Accessor
     NumberProvider getBonusRolls();
-
-    // FORGE ONLY
-    @Accessor(remap = false)
-    String getName();
 }

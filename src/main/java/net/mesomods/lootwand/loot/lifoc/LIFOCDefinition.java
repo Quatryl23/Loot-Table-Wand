@@ -6,9 +6,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.registries.IForgeRegistry;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,14 +32,6 @@ public abstract class LIFOCDefinition<T, O extends LIFOCDefinition<T, O>> {
     public LIFOCDefinition(Class<T> functionClass, Component description) {
         this.lifocClass = functionClass;
         this.description = description;
-    }
-
-    public <V> O registryParameter(String description, IForgeRegistry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer, Function<V, Component> toComponent) {
-        return this.parameter(new ParameterDefinition<>(new ForgeRegistryParameter<>(null, description, registry, toComponent), supplier, consumer));
-    }
-
-    public <V> O registryParameter(String description, IForgeRegistry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer) {
-        return this.parameter(new ParameterDefinition<>(new ForgeRegistryParameter<>(null, description, registry), supplier, consumer));
     }
 
     public <V> O registryParameter(String description, Registry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer, Function<V, Component> toComponent) {
@@ -135,7 +126,7 @@ public abstract class LIFOCDefinition<T, O extends LIFOCDefinition<T, O>> {
     public final O hiddenByDefault() {
         this.hiddenByDefault = true;
         return (O) this;
-    };
+    }
 
     public interface BuildableParameterDefinition<T, R extends RenderableParameter> {
         R build(T rawFunction);

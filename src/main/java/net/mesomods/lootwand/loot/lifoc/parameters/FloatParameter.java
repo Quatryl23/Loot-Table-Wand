@@ -3,8 +3,8 @@ package net.mesomods.lootwand.loot.lifoc.parameters;
 import net.mesomods.lootwand.client.ScreenUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;

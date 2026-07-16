@@ -1,6 +1,9 @@
 {
   "required": true,
   "minVersion": "0.8",
+  "mixinextras": {
+    "minVersion": "0.5.4"
+  },
   "package": "net.mesomods.lootwand.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "loot_table_wand.refmap.json",
@@ -8,8 +11,9 @@
     "BlockEntityMixin",
     "RandomizableContainerBlockEntityMixin",
     "StatsScreenAccessor",
-    "forge.loot.condition.CanToolPerformActionAccessor",
-    "forge.loot.condition.LootTableIdConditionAccessor",
+    "fabric.AbstractSliderButtonAccessor",
+    "fabric.ServerPlayerGameModeMixin",
+    "fabric.gui.AbstractButtonMixin",
     "gui.AbstractWidgetMixin",
     "loot.LootItemAccessor",
     "loot.LootPoolAccessor",
@@ -112,6 +116,7 @@
   "client": [
     "ItemRendererMixin",
     "MinecraftMixin",
+    "fabric.MultiPlayerGameModeMixin",
     "gui.AbstractSelectionListAccessor",
     "gui.GuiGraphicsMixin",
     "gui.GuiMixin",

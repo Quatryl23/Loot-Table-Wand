@@ -1,16 +1,15 @@
 package net.mesomods.lootwand.network.packet;
 
-import net.mesomods.lootwand.capabilities.ModCapabilities;
-import net.mesomods.lootwand.capabilities.NumberProviderTooltipMode;
+import net.mesomods.lootwand.attachments.ModAttachments;
+import net.mesomods.lootwand.attachments.NumberProviderTooltipMode;
 import net.mesomods.lootwand.client.LootTableWandRenderer;
 import net.mesomods.lootwand.client.gui.LootTableViewMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
-
-import javax.annotation.Nullable;
-import java.util.function.Supplier;
+import org.jetbrains.annotations.Nullable;
 
 public class UpdateLootTableWandPlayerDataPacket {
 	private final Boolean keybindsShown;
@@ -69,35 +68,38 @@ public class UpdateLootTableWandPlayerDataPacket {
 		return new UpdateLootTableWandPlayerDataPacket(buf.readBoolean() ? buf.readBoolean() : null, buf.readBoolean() ? buf.readBoolean() : null, buf.readBoolean() ? buf.readBoolean() : null, buf.readBoolean() ? buf.readInt() : null, buf.readBoolean() ? buf.readEnum(LootTableViewMode.class) : null, buf.readBoolean() ? buf.readEnum(NumberProviderTooltipMode.class) : null, buf.readBoolean() ? buf.readBoolean() : null, buf.readBoolean() ? buf.readBoolean() : null, buf.readBoolean() ? buf.readFloat() : null);
 	}
 
-	public static void handle(UpdateLootTableWandPlayerDataPacket packet, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> {
-            boolean isServer = ctx.get().getDirection().getReceptionSide().isServer();
-			Player player = isServer ? ctx.get().getSender() : Minecraft.getInstance().player;
-			if (player != null)
-				ModCapabilities.setPlayerData(player, (data -> {
-					if (packet.keybindsShown != null)
-						data.setKeybindsShown(packet.keybindsShown);
-					if (packet.emptyTargetContainer != null)
-						data.setEmptyTargetContainer(packet.emptyTargetContainer);
-					if (packet.synchronizeWands != null)
-						data.setSynchronizeWands(packet.synchronizeWands);
-					if (packet.previewTime != null)
-						data.setPreviewTime(packet.previewTime);
-					if (packet.lootTableViewMode != null)
-						data.setLootTableViewMode(packet.lootTableViewMode);
-					if (packet.numberProviderTooltipMode != null)
-						data.setNumberProviderTooltipMode(packet.numberProviderTooltipMode);
-					if (packet.countPreview != null)
-						data.setCountPreview(packet.countPreview);
-					if (packet.hideDefaults != null)
-						data.setHideDefaults(packet.hideDefaults);
-					if (packet.luck != null)
-						data.setLuck(packet.luck);
-					if (!isServer && packet.previewTime != null) {
-						LootTableWandRenderer.PREVIEW_CYCLE_TIME = packet.previewTime;
-					}
-				}));
-		});
-		ctx.get().setPacketHandled(true);
+	public static void handleClient(UpdateLootTableWandPlayerDataPacket packet, Minecraft mc) {
+		mc.execute(() -> handle(packet, mc.player, false));
+	}
+
+	public static void handleServer(UpdateLootTableWandPlayerDataPacket packet, MinecraftServer server, ServerPlayer player) {
+		server.execute(() -> handle(packet, player, true));
+	}
+
+	public static void handle(UpdateLootTableWandPlayerDataPacket packet, Player player, boolean isServer) {
+		if (player != null)
+			ModAttachments.setPlayerData(player, (data -> {
+				if (packet.keybindsShown != null)
+					data.setKeybindsShown(packet.keybindsShown);
+				if (packet.emptyTargetContainer != null)
+					data.setEmptyTargetContainer(packet.emptyTargetContainer);
+				if (packet.synchronizeWands != null)
+					data.setSynchronizeWands(packet.synchronizeWands);
+				if (packet.previewTime != null)
+					data.setPreviewTime(packet.previewTime);
+				if (packet.lootTableViewMode != null)
+					data.setLootTableViewMode(packet.lootTableViewMode);
+				if (packet.numberProviderTooltipMode != null)
+					data.setNumberProviderTooltipMode(packet.numberProviderTooltipMode);
+				if (packet.countPreview != null)
+					data.setCountPreview(packet.countPreview);
+				if (packet.hideDefaults != null)
+					data.setHideDefaults(packet.hideDefaults);
+				if (packet.luck != null)
+					data.setLuck(packet.luck);
+				if (!isServer && packet.previewTime != null) {
+					LootTableWandRenderer.PREVIEW_CYCLE_TIME = packet.previewTime;
+				}
+			}));
 	}
 }

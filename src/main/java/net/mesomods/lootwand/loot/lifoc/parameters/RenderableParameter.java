@@ -8,8 +8,7 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class RenderableParameter implements Clickable {
     boolean hidden = false;
@@ -22,10 +21,6 @@ public abstract class RenderableParameter implements Clickable {
     public abstract int getWidth();
 
     public abstract boolean isDefault();
-
-    public void setHidden(boolean hidden) {
-        this.hidden = hidden;
-    }
 
     public void setHeightUpdater(Runnable heightUpdater) {
         this.heightUpdater = heightUpdater;
@@ -47,7 +42,11 @@ public abstract class RenderableParameter implements Clickable {
         return hidden;
     }
 
-    @Nonnull
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
+    @NotNull
     public abstract Component getComponent();
 
     public void renderTooltip(int textWidth, int x0, int x1, int y, int height, int mouseX, int mouseY) {

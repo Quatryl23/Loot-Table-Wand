@@ -2,11 +2,11 @@ package net.mesomods.lootwand.loot.lifoc;
 
 import com.mojang.datafixers.util.Pair;
 import net.mesomods.lootwand.loot.lifoc.parameters.*;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
-import net.minecraftforge.registries.IForgeRegistry;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -14,7 +14,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FunctionDefinition<T> extends LIFOCDefinition<T, FunctionDefinition<T>> {
-    private BuildableParameterDefinition<T, ?> descriptionParameter;
 
     public FunctionDefinition(Class<T> functionClass) {
         super(functionClass);
@@ -74,7 +73,7 @@ public class FunctionDefinition<T> extends LIFOCDefinition<T, FunctionDefinition
     }
 
     public <R extends RenderableParameter, E> FunctionDefinition<T> listDescriptionParameter(String description, @Nullable String singleDescription, @Nullable String emptyDescription, BuildableParameterDefinition<E, R> definition, Function<T, List<E>> supplier, BiConsumer<T, List<E>> consumer, Function<T, E> blueprint, boolean renderOutlines, Function<Integer, String> indexReplacer) {
-        this.descriptionParameter = new ListParameterDefinition<>(new ListParameter<>(Component.translatable(description), singleDescription == null ? null : (param) ->  new Parameter.Description<>(singleDescription, (value) -> Component.empty()), emptyDescription == null ? null : Component.translatable(emptyDescription), definition, renderOutlines, indexReplacer), supplier, consumer, blueprint);
+        this.descriptionParameter = new ListParameterDefinition<>(new ListParameter<>(Component.translatable(description), singleDescription == null ? null : (param) -> new Parameter.Description<>(singleDescription, (value) -> Component.empty()), emptyDescription == null ? null : Component.translatable(emptyDescription), definition, renderOutlines, indexReplacer), supplier, consumer, blueprint);
         return this;
     }
 
@@ -89,14 +88,6 @@ public class FunctionDefinition<T> extends LIFOCDefinition<T, FunctionDefinition
         return this;
     }
 
-    public <V> FunctionDefinition<T> registryDescriptionParameter(String description, IForgeRegistry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer, Function<V, Component> toComponent) {
-        return this.descriptionParameter(new ParameterDefinition<>(new ForgeRegistryParameter<>(null, description, registry, toComponent), supplier, consumer));
-    }
-
-    public <V> FunctionDefinition<T> registryDescriptionParameter(String description, IForgeRegistry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer) {
-        return this.descriptionParameter(new ParameterDefinition<>(new ForgeRegistryParameter<>(null, description, registry), supplier, consumer));
-    }
-
     public <P> FunctionDefinition<T> inlineMultiModeDescriptionParameter(Parameter<P> parameter, Function<T, P> supplier, BiConsumer<T, P> consumer, Function<T, Pair<String, List<BuildableParameterDefinition<T, ?>>>> modeToParams) {
         this.descriptionParameter = new InlineMultiModeParameterDefinition<>(parameter, supplier, consumer, modeToParams);
         return this;
@@ -104,6 +95,16 @@ public class FunctionDefinition<T> extends LIFOCDefinition<T, FunctionDefinition
 
     public <P> FunctionDefinition<T> inlineMultiModeDescriptionParameter(Class<P> clazz, Function<T, P> supplier, BiConsumer<T, P> consumer, Function<P, Pair<String, List<BuildableParameterDefinition<P, ?>>>> modeToParams) {
         this.descriptionParameter = new InlineMultiModeParameterDefinition<>(clazz, supplier, consumer, modeToParams);
+        return this;
+    }
+
+    public <V> FunctionDefinition<T> registryDescriptionParameter(String description, Registry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer) {
+        this.descriptionParameter = new ParameterDefinition<>(new VanillaRegistryParameter<>(null, description, registry), supplier, consumer);
+        return this;
+    }
+
+    public <V> FunctionDefinition<T> registryDescriptionParameter(String description, Registry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer, Function<V, Component> toComponent) {
+        this.descriptionParameter = new ParameterDefinition<>(new VanillaRegistryParameter<>(null, description, registry, toComponent), supplier, consumer);
         return this;
     }
 }

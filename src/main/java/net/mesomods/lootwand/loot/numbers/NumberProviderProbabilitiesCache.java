@@ -2,8 +2,8 @@ package net.mesomods.lootwand.loot.numbers;
 
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import net.mesomods.lootwand.LootWandMod;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

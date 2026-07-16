@@ -1,11 +1,11 @@
 package net.mesomods.lootwand.loot.lifoc;
 
 import net.mesomods.lootwand.loot.lifoc.parameters.*;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.registries.IForgeRegistry;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -95,15 +95,15 @@ public class ConditionDefinition<T> extends LIFOCDefinition<T, ConditionDefiniti
         return this;
     }
 
-    public <V> ConditionDefinition<T> registryDescriptionParameter(String description, String invertedDescription, IForgeRegistry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer, Function<V, Component> toComponent) {
-        this.descriptionParameter = new ParameterDefinition<>(new ForgeRegistryParameter<>(null, description, registry, toComponent), supplier, consumer);
-        this.invertedDescriptionParameter = new ParameterDefinition<>(new ForgeRegistryParameter<>(null, invertedDescription, registry, toComponent), supplier, consumer);
+    public <V> ConditionDefinition<T> registryDescriptionParameter(String description, String invertedDescription, Registry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer) {
+        this.descriptionParameter = new ParameterDefinition<>(new VanillaRegistryParameter<>(null, description, registry), supplier, consumer);
+        this.invertedDescriptionParameter = new ParameterDefinition<>(new VanillaRegistryParameter<>(null, invertedDescription, registry), supplier, consumer);
         return this;
     }
 
-    public <V> ConditionDefinition<T> registryDescriptionParameter(String description, String invertedDescription, IForgeRegistry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer) {
-        this.descriptionParameter = new ParameterDefinition<>(new ForgeRegistryParameter<>(null, description, registry), supplier, consumer);
-        this.invertedDescriptionParameter = new ParameterDefinition<>(new ForgeRegistryParameter<>(null, invertedDescription, registry), supplier, consumer);
+    public <V> ConditionDefinition<T> registryDescriptionParameter(String description, String invertedDescription, Registry<V> registry, Function<T, V> supplier, BiConsumer<T, V> consumer, Function<V, Component> toComponent) {
+        this.descriptionParameter = new ParameterDefinition<>(new VanillaRegistryParameter<>(null, description, registry, toComponent), supplier, consumer);
+        this.invertedDescriptionParameter = new ParameterDefinition<>(new VanillaRegistryParameter<>(null, invertedDescription, registry, toComponent), supplier, consumer);
         return this;
     }
 }

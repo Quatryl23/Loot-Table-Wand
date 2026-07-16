@@ -1,20 +1,21 @@
 package net.mesomods.lootwand.item;
 
 import net.mesomods.lootwand.LootWandMod;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.ModItems;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
 import net.mesomods.lootwand.client.gui.screen.LootTableWandScreen;
 import net.mesomods.lootwand.container.RandomizableContainerBlockEntityAccessor;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.mesomods.lootwand.network.packet.client.UpdateLootTableWandPacket;
 import net.mesomods.lootwand.network.packet.server.WandItemPreviewPacket;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -30,14 +31,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.network.NetworkEvent;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class LootTableWandItem extends Item {
     public LootTableWandItem() {
@@ -57,17 +53,6 @@ public class LootTableWandItem extends Item {
     }
 
     @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(new IClientItemExtensions() {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return LootWandMod.getRenderer();
-            }
-        });
-    }
-
-    @Override
-    @OnlyIn(Dist.CLIENT)
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide) return InteractionResultHolder.success(stack);
@@ -75,13 +60,7 @@ public class LootTableWandItem extends Item {
         return InteractionResultHolder.success(stack);
     }
 
-    @Override
-    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
-        return this.rightClickOn(context);
-    }
-
-
-    public InteractionResult leftClickOn(Player player, Level level, BlockPos targetPos, InteractionHand hand) {
+    public static InteractionResult leftClickOn(Player player, Level level, BlockPos targetPos, InteractionHand hand) {
         if (player == null) return InteractionResult.FAIL;
         BlockEntity targetBE = level.getBlockEntity(targetPos);
         if (targetBE instanceof RandomizableContainerBlockEntity container) {
@@ -97,14 +76,13 @@ public class LootTableWandItem extends Item {
             container.setLootTable(null, 0);
             container.setChanged();
             level.playSound(null, targetPos, SoundEvents.NOTE_BLOCK_BANJO.value(), SoundSource.PLAYERS);
-            ((ServerLevel) level).sendParticles(LootWandMod.REMOVE_LOOT_TABLE_PARTICLE.get(), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 12, 0.5, 0.5, 0.5, 0.5);
+            ((ServerLevel) level).sendParticles(LootWandMod.REMOVE_LOOT_TABLE_PARTICLE, targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 12, 0.5, 0.5, 0.5, 0.5);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
 
-    @OnlyIn(Dist.CLIENT)
-    public InteractionResult middleClickOn(Player player, RandomizableContainerBlockEntityAccessor entity, ItemStack wand) {
+    public static InteractionResult middleClickOn(Player player, RandomizableContainerBlockEntityAccessor entity, ItemStack wand) {
         if (player.isSecondaryUseActive()) return InteractionResult.PASS;
         ResourceLocation lootTable = entity.getLootTable();
         if (lootTable == null) return InteractionResult.SUCCESS;
@@ -112,7 +90,7 @@ public class LootTableWandItem extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    public InteractionResult rightClickOn(UseOnContext context) {
+    public static InteractionResult rightClickOn(UseOnContext context) {
         Level level = context.getLevel();
         Player player = context.getPlayer();
         if (player == null) return InteractionResult.FAIL;
@@ -133,7 +111,7 @@ public class LootTableWandItem extends Item {
             container.setLootTable(wandLootTable, 0);
             container.setChanged();
             level.playSound(null, targetPos, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS);
-            ((ServerLevel) level).sendParticles(LootWandMod.ADD_LOOT_TABLE_PARTICLE.get(), targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 12, 0.5, 0.5, 0.5, 0.5);
+            ((ServerLevel) level).sendParticles(LootWandMod.ADD_LOOT_TABLE_PARTICLE, targetPos.getX() + 0.5, targetPos.getY() + 0.5, targetPos.getZ() + 0.5, 12, 0.5, 0.5, 0.5, 0.5);
             return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
@@ -154,7 +132,7 @@ public class LootTableWandItem extends Item {
         String lootTableKey = "LootTable" + lootTableSlot;
         itemStackData.putString(lootTableKey, lootTableString);
         if (isClient) {
-            LootTableNetwork.CHANNEL.sendToServer(UpdateLootTableWandPacket.setTable(player.getInventory().items.indexOf(stack), lootTableSlot, lootTableString));
+            LootTableNetwork.sendToServer(UpdateLootTableWandPacket.setTable(player.getInventory().items.indexOf(stack), lootTableSlot, lootTableString));
         }
     }
 
@@ -163,7 +141,7 @@ public class LootTableWandItem extends Item {
         boolean deletionMode = itemStackNbt.contains("DeletionMode") && itemStackNbt.getBoolean("DeletionMode");
         itemStackNbt.putBoolean("DeletionMode", !deletionMode);
         if (isClient)
-            LootTableNetwork.CHANNEL.sendToServer(UpdateLootTableWandPacket.toggleDeletionMode(player.getInventory().items.indexOf(stack)));
+            LootTableNetwork.sendToServer(UpdateLootTableWandPacket.toggleDeletionMode(player.getInventory().items.indexOf(stack)));
         return !deletionMode;
     }
 
@@ -205,27 +183,27 @@ public class LootTableWandItem extends Item {
     public static void setActiveLootTableIndexClient(ItemStack stack, int index, Player player) {
         if (LootTableWandPlayerDataManager.shouldSynchronizeWands(player)) {
             for (ItemStack itemstack : player.getInventory().items) {
-                if (itemstack.is(LootWandMod.LOOT_TABLE_WAND.get())) {
+                if (itemstack.is(ModItems.LOOT_TABLE_WAND)) {
                     setActiveLootTableIndex(itemstack, index);
                 }
             }
         } else {
             setActiveLootTableIndex(stack, index);
         }
-        LootTableNetwork.CHANNEL.sendToServer(UpdateLootTableWandPacket.activateTable(player.getInventory().items.indexOf(stack), index));
+        LootTableNetwork.sendToServer(UpdateLootTableWandPacket.activateTable(player.getInventory().items.indexOf(stack), index));
     }
 
-    public static void setActiveLootTableWandIndexServer(ItemStack stack, int index, Player player, NetworkEvent.Context context) {
+    public static void setActiveLootTableWandIndexServer(ItemStack stack, int index, ServerPlayer player) {
         if (LootTableWandPlayerDataManager.shouldSynchronizeWands(player)) {
             for (ItemStack itemstack : player.getInventory().items) {
-                if (itemstack.is(LootWandMod.LOOT_TABLE_WAND.get())) {
+                if (itemstack.is(ModItems.LOOT_TABLE_WAND)) {
                     setActiveLootTableIndex(itemstack, index);
-                    WandItemPreviewPacket.sendPreviewListUpdate(player.getInventory().items.indexOf(itemstack), LootTableWandItem.getLootTable(itemstack, index), context);
+                    WandItemPreviewPacket.sendPreviewListUpdate(player.getInventory().items.indexOf(itemstack), LootTableWandItem.getLootTable(itemstack, index), player);
                 }
             }
         } else {
             setActiveLootTableIndex(stack, index);
-            WandItemPreviewPacket.sendPreviewListUpdate(player.getInventory().items.indexOf(stack), LootTableWandItem.getLootTable(stack, index), context);
+            WandItemPreviewPacket.sendPreviewListUpdate(player.getInventory().items.indexOf(stack), LootTableWandItem.getLootTable(stack, index), player);
         }
     }
 
@@ -237,7 +215,7 @@ public class LootTableWandItem extends Item {
         String lootTableKey = "LootTable" + index;
         itemStackData.remove(lootTableKey);
         if (isClient) {
-            LootTableNetwork.CHANNEL.sendToServer(UpdateLootTableWandPacket.removeTable(player.getInventory().items.indexOf(stack), index));
+            LootTableNetwork.sendToServer(UpdateLootTableWandPacket.removeTable(player.getInventory().items.indexOf(stack), index));
         }
     }
 
@@ -294,6 +272,6 @@ public class LootTableWandItem extends Item {
             return null;
         }
         String lootTableString = itemStackData.getString(lootTableKey);
-        return ResourceLocation.parse(lootTableString);
+        return new ResourceLocation(lootTableString);
     }
 }

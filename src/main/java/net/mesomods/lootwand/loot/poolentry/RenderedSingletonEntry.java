@@ -20,13 +20,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
 public abstract class RenderedSingletonEntry extends RenderedLootPool.Entry implements LifocParent {
-    public static final ResourceLocation ITEM_SLOT = ResourceLocation.parse("textures/gui/container/stats_icons.png");
+    public static final ResourceLocation ITEM_SLOT = new ResourceLocation("textures/gui/container/stats_icons.png");
     public static final Font FONT = Minecraft.getInstance().font;
     protected int totalHeight;
     protected List<RenderedFunction> functions;

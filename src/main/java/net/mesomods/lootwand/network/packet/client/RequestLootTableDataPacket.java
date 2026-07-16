@@ -9,18 +9,15 @@ import net.mesomods.lootwand.network.packet.server.ResponseLootTableDataPacket;
 import net.mesomods.lootwand.util.LootContextManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.storage.loot.Deserializers;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public record RequestLootTableDataPacket(ResourceLocation tableId) {
     public static final Gson GSON = new Gson();
@@ -33,26 +30,23 @@ public record RequestLootTableDataPacket(ResourceLocation tableId) {
         return new RequestLootTableDataPacket(buf.readResourceLocation());
     }
 
-    public static void handle(RequestLootTableDataPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        NetworkEvent.Context context = ctx.get();
-        context.enqueueWork(() -> {
-            ServerPlayer player = context.getSender();
+    public static void handle(RequestLootTableDataPacket packet, MinecraftServer server, ServerPlayer player) {
+        server.execute(() -> {
             if (player == null) return;
-            ResourceLocation fullLocation = ResourceLocation.fromNamespaceAndPath(packet.tableId.getNamespace(), "loot_tables/" + packet.tableId.getPath() + ".json");
+            ResourceLocation fullLocation = new ResourceLocation(packet.tableId.getNamespace(), "loot_tables/" + packet.tableId.getPath() + ".json");
             Optional<Resource> resource = player.server.getResourceManager().getResource(fullLocation);
             if (resource.isPresent()) {
                 try {
                     JsonObject json = GsonHelper.fromJson(GSON, resource.get().openAsReader(), JsonElement.class).getAsJsonObject();
-                    LootTableNetwork.CHANNEL.sendTo(new ResponseLootTableDataPacket(json), context.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
-                    LootTable table = ForgeHooks.loadLootTable(Deserializers.createLootTableSerializer().create(), packet.tableId, json, !packet.tableId.getNamespace().equals("minecraft"));
+                    LootTableNetwork.sendToClient(player, new ResponseLootTableDataPacket(json));
+                    LootTable table = Deserializers.createLootTableSerializer().create().fromJson(json, LootTable.class);
                     LootContextManager.updateContext(player.serverLevel(), table, player);
                 } catch (IOException | JsonParseException | IllegalArgumentException e) {
-                    LootTableNetwork.CHANNEL.sendTo(new ResponseLootTableDataPacket(null), context.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+                    LootTableNetwork.sendToClient(player, new ResponseLootTableDataPacket(null));
                 }
             } else {
-                LootTableNetwork.CHANNEL.sendTo(new ResponseLootTableDataPacket(null), context.getNetworkManager(), NetworkDirection.PLAY_TO_CLIENT);
+                LootTableNetwork.sendToClient(player, new ResponseLootTableDataPacket(null));
             }
         });
-        context.setPacketHandled(true);
     }
 }

@@ -2,8 +2,11 @@ package net.mesomods.lootwand.client.gui;
 
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.fabricmc.fabric.mixin.client.keybinding.KeyBindingAccessor;
 import net.mesomods.lootwand.LootWandMod;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.ModItems;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.client.LootWandModClient;
 import net.mesomods.lootwand.client.ScreenUtils;
 import net.mesomods.lootwand.container.RandomizableContainerBlockEntityAccessor;
 import net.mesomods.lootwand.item.LootTableWandItem;
@@ -22,14 +25,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 import org.lwjgl.glfw.GLFW;
 
-@OnlyIn(Dist.CLIENT)
-public class LootTableWandDetailsOverlay implements IGuiOverlay {
+public class LootTableWandDetailsOverlay {
     public static final Font FONT = ScreenUtils.FONT;
     public static final int LOOT_TABLE_NAME_COLOR = 0xFFFFFF;
     public static final int WAND_NAME_COLOR = ChatFormatting.LIGHT_PURPLE.getColor();
@@ -50,17 +48,16 @@ public class LootTableWandDetailsOverlay implements IGuiOverlay {
     public static final ResourceLocation TEXTURE_KEY_MOUSE_MIDDLE = overlayTexture("mouse_middle");
     public static final ResourceLocation TEXTURE_KEY_MOUSE_RIGHT = overlayTexture("mouse_right");
 
-    public static ResourceLocation overlayTexture(String string) {
-        return ResourceLocation.fromNamespaceAndPath(LootWandMod.MODID, "textures/gui/overlay/" +  string + ".png");
+    private static ResourceLocation overlayTexture(String string) {
+        return new ResourceLocation(LootWandMod.MODID, "textures/gui/overlay/" +  string + ".png");
     }
 
-    @Override
-    public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
+    public static void render(GuiGraphics graphics, int screenWidth, int screenHeight) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) return;
         Player player = mc.player;
         ItemStack stack = player.getMainHandItem();
-        if (!stack.is(LootWandMod.LOOT_TABLE_WAND.get())) return;
+        if (!stack.is(ModItems.LOOT_TABLE_WAND)) return;
         HitResult result = mc.hitResult;
         Component containerName = null;
         Component wandName = stack.getHoverName();
@@ -80,30 +77,30 @@ public class LootTableWandDetailsOverlay implements IGuiOverlay {
             renderKeybinds(graphics, containerName, wandName, screenHeight);
     }
 
-    public void drawTargetContainerTableDetails(GuiGraphics graphics, Component containerName, Component lootTable, int screenWidth, int screenHeight) {
+    private static void drawTargetContainerTableDetails(GuiGraphics graphics, Component containerName, Component lootTable, int screenWidth, int screenHeight) {
         drawLootTableInfoBox(graphics, lootTable, screenWidth / 2, screenHeight - 83, containerName, CONTAINER_NAME_COLOR);
     }
 
-    public void drawWandTableDetails(GuiGraphics graphics, Component lootTableWandName, Component lootTable, int screenWidth, int screenHeight) {
+    private static void drawWandTableDetails(GuiGraphics graphics, Component lootTableWandName, Component lootTable, int screenWidth, int screenHeight) {
         drawLootTableInfoBox(graphics, lootTable, screenWidth / 2, screenHeight - 53, lootTableWandName, WAND_NAME_COLOR);
     }
 
-    public void renderKeybinds(GuiGraphics graphics, Component containerName, Component wandName, int screenHeight) {
+    private static void renderKeybinds(GuiGraphics graphics, Component containerName, Component wandName, int screenHeight) {
         int lineHeight = (FONT.lineHeight / 2) + 4;
         int startHeight = screenHeight - 14;
         Options options = Minecraft.getInstance().options;
-        drawKeybindInfo(graphics, LootWandMod.HIDE_KEYBINDS_KEY.get(), "gui.loot_table_wand.overlay.hide_keybinds", null, startHeight);
-        drawKeybindInfo(graphics, LootWandMod.NEXT_LOOT_TABLE_KEY.get(), "gui.loot_table_wand.overlay.next_loot_table", null, startHeight - lineHeight);
-        drawKeybindInfo(graphics, LootWandMod.PREVIOUS_LOOT_TABLE_KEY.get(), "gui.loot_table_wand.overlay.previous_loot_table", null, startHeight - 2 * lineHeight);
+        drawKeybindInfo(graphics, LootWandModClient.HIDE_KEYBINDS_KEY, "gui.loot_table_wand.overlay.hide_keybinds", null, startHeight);
+        drawKeybindInfo(graphics, LootWandModClient.NEXT_LOOT_TABLE_KEY, "gui.loot_table_wand.overlay.next_loot_table", null, startHeight - lineHeight);
+        drawKeybindInfo(graphics, LootWandModClient.PREVIOUS_LOOT_TABLE_KEY, "gui.loot_table_wand.overlay.previous_loot_table", null, startHeight - 2 * lineHeight);
         if (containerName == null) {
-            drawKeybindInfo(graphics, LootWandMod.INSPECT_KEY.get(), "gui.loot_table_wand.overlay.inspect_wand_loot_table", wandName, startHeight - 3 * lineHeight);
+            drawKeybindInfo(graphics, LootWandModClient.INSPECT_KEY, "gui.loot_table_wand.overlay.inspect_wand_loot_table", wandName, startHeight - 3 * lineHeight);
             drawKeybindInfo(graphics, options.keyUse, "gui.loot_table_wand.overlay.open_gui", null, startHeight - 4 * lineHeight);
         } else {
-            drawKeybindInfo(graphics, options.keyShift, LootWandMod.INSPECT_KEY.get(), "gui.loot_table_wand.overlay.inspect_loot_table", wandName, startHeight - 3 * lineHeight);
+            drawKeybindInfo(graphics, options.keyShift, LootWandModClient.INSPECT_KEY, "gui.loot_table_wand.overlay.inspect_loot_table", wandName, startHeight - 3 * lineHeight);
             drawKeybindInfo(graphics, options.keyShift, options.keyAttack, "gui.loot_table_wand.overlay.destroy_container", containerName, startHeight - 4 * lineHeight);
             drawKeybindInfo(graphics, options.keyShift, options.keyPickItem, "gui.loot_table_wand.overlay.pick_container", containerName, startHeight - 5 * lineHeight);
             drawKeybindInfo(graphics, options.keyShift, options.keyUse, "gui.loot_table_wand.overlay.open_container", containerName, startHeight - 6 * lineHeight);
-            drawKeybindInfo(graphics, LootWandMod.INSPECT_KEY.get(), "gui.loot_table_wand.overlay.inspect_loot_table", containerName, startHeight - 7 * lineHeight);
+            drawKeybindInfo(graphics, LootWandModClient.INSPECT_KEY, "gui.loot_table_wand.overlay.inspect_loot_table", containerName, startHeight - 7 * lineHeight);
             drawKeybindInfo(graphics, options.keyAttack, "gui.loot_table_wand.overlay.remove_loot_table", containerName, startHeight - 8 * lineHeight);
             drawKeybindInfo(graphics, options.keyPickItem, "gui.loot_table_wand.overlay.pick_loot_table", containerName, startHeight - 9 * lineHeight);
             drawKeybindInfo(graphics, options.keyUse, "gui.loot_table_wand.overlay.set_loot_table", containerName, startHeight - 10 * lineHeight);
@@ -111,11 +108,11 @@ public class LootTableWandDetailsOverlay implements IGuiOverlay {
 
     }
 
-    public void drawKeybindInfo(GuiGraphics graphics, KeyMapping keyMapping, String translationKey, Component containerName, int y) {
+    private static void drawKeybindInfo(GuiGraphics graphics, KeyMapping keyMapping, String translationKey, Component containerName, int y) {
         drawKeybindInfo(graphics, keyMapping, null, translationKey, containerName, y);
     }
 
-    public void drawKeybindInfo(GuiGraphics graphics, KeyMapping keyMapping, KeyMapping secondKeyMapping, String translationKey, Component actionTargetName, int y) {
+    private static void drawKeybindInfo(GuiGraphics graphics, KeyMapping keyMapping, KeyMapping secondKeyMapping, String translationKey, Component actionTargetName, int y) {
         int x = drawNamedKey(graphics, keyMapping, 10, y);
         if (secondKeyMapping != null) {
             ScreenUtils.drawScaledString(graphics, "+", x + 3, y + 1.5f, KEYBINDS_DESCRIPTION_COLOR, 0.5f, false, true);
@@ -125,8 +122,8 @@ public class LootTableWandDetailsOverlay implements IGuiOverlay {
         ScreenUtils.drawScaledString(graphics, keybindDescription, Math.max(20, x + 3), y + 1.5f, KEYBINDS_DESCRIPTION_COLOR, 0.5f, false, true);
     }
 
-    public int drawNamedKey(GuiGraphics graphics, KeyMapping keyMapping, int x, int y) {
-        InputConstants.Key key = keyMapping.getKey();
+    private static int drawNamedKey(GuiGraphics graphics, KeyMapping keyMapping, int x, int y) {
+        InputConstants.Key key = ((KeyBindingAccessor)keyMapping).fabric_getBoundKey();
         if (key.getValue() == GLFW.GLFW_KEY_LEFT_SHIFT) {
             graphics.blit(TEXTURE_KEY_SHIFT, x, y, 0, 0, 0, 24, 8, 24, 8);
             return x + 15;
@@ -159,7 +156,7 @@ public class LootTableWandDetailsOverlay implements IGuiOverlay {
         return i + 2;
     }
 
-    public void drawLootTableInfoBox(GuiGraphics graphics, Component lootTable, int centerX, int y, Component tableSource, int tableSourceColor) {
+    private static void drawLootTableInfoBox(GuiGraphics graphics, Component lootTable, int centerX, int y, Component tableSource, int tableSourceColor) {
         int x = centerX - 4;
         int textWidth = FONT.width(lootTable);
         int halfTextureWidth = Mth.clamp(4 * (int) Math.round((Math.max(textWidth / 2.0, FONT.width(tableSource) / 4.0) + 6.0) / 4.0), 12, 180);

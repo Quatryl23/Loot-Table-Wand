@@ -11,13 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
+
 public class RenderedCondition extends RenderedLIFOC {
     public static final MutableComponent DESCRIPTION_PREFIX = Component.literal("- ");
     public static final int PREFIX_WIDTH = ScreenUtils.FONT.width(DESCRIPTION_PREFIX);

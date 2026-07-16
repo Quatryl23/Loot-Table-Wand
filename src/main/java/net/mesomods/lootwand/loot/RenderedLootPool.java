@@ -21,8 +21,8 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,13 +40,8 @@ public class RenderedLootPool extends RenderedLootTable.Pool implements LifocPar
     protected NumberProvider bonusRolls;
     protected LootTableViewMode viewMode;
     protected float luck;
-    public String name;
 
-    public static boolean isLameName(String name) {
-        return name.startsWith("custom#") || name.equals("main") || name.startsWith("pool");
-    }
-
-    public RenderedLootPool(RenderedLootTable table, List<Entry> entries, LootItemFunction[] functions, LootItemCondition[] conditions, NumberProvider rolls, NumberProvider bonusRolls, String name, LootTableViewMode viewMode, float luck) {
+    public RenderedLootPool(RenderedLootTable table, List<Entry> entries, LootItemFunction[] functions, LootItemCondition[] conditions, NumberProvider rolls, NumberProvider bonusRolls, LootTableViewMode viewMode, float luck) {
         super(table);
         this.entries = new ArrayList<>(entries);
         this.entriesOriginalOrder = new ArrayList<>(entries);
@@ -65,12 +60,10 @@ public class RenderedLootPool extends RenderedLootTable.Pool implements LifocPar
         this.viewMode = viewMode;
         this.luck = luck;
         onEntryUpdate();
-        // FORGE ONLY
-        this.name = isLameName(name) ? null : name;
     }
 
     public static RenderedLootPool fromVanilla(RenderedLootTable table, LootPoolAccessor pool, LootTableViewMode viewMode, float luck) {
-        return new RenderedLootPool(table, Arrays.stream(pool.getEntries()).map(entry -> Entry.fromVanilla(entry, false)).toList(), pool.getFunctions(), pool.getConditions(), NumberProvider.fromVanilla(pool.getRolls()), NumberProvider.fromVanilla(pool.getBonusRolls()), pool.getName(), viewMode, luck);
+        return new RenderedLootPool(table, Arrays.stream(pool.getEntries()).map(entry -> Entry.fromVanilla(entry, false)).toList(), pool.getFunctions(), pool.getConditions(), NumberProvider.fromVanilla(pool.getRolls()), NumberProvider.fromVanilla(pool.getBonusRolls()), viewMode, luck);
     }
 
     public void onEntryUpdate() {
@@ -171,12 +164,6 @@ public class RenderedLootPool extends RenderedLootTable.Pool implements LifocPar
     public void renderTopBar(GuiGraphics graphics, int top, int left, int width, int height, int mouseX, int mouseY) {
         int x = left + 5;
         Font FONT = Minecraft.getInstance().font;
-        // FORGE START
-        if (name != null && !name.isEmpty()) {
-            graphics.drawString(FONT, name, x, top + 2, 0xFFFFFF);
-            x = left + 17 + (width / 2);
-        }
-        // FORGE END
         graphics.drawString(FONT, Component.translatable("gui.loot_table_wand.loot_pool.rolls"), x, top + 2, 0xFFFFFF);
         x += FONT.width(Component.translatable("gui.loot_table_wand.loot_pool.rolls")) + 5;
         ScreenUtils.renderNumberProvider(graphics, rolls, false, x, top + 2, 0xFFFFFF, false, mouseX, mouseY);

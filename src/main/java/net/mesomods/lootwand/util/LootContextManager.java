@@ -57,7 +57,7 @@ public class LootContextManager {
         if (requiredParams.contains(LootContextParams.DAMAGE_SOURCE)) {
             Registry<DamageType> damageTypeRegistry = registry.registryOrThrow(Registries.DAMAGE_TYPE);
             Holder<DamageType> genericDamage = damageTypeRegistry.getHolderOrThrow(DamageTypes.GENERIC);
-            params.withParameter(LootContextParams.DAMAGE_SOURCE, new DamageSource(genericDamage, null, null, null));
+            params.withParameter(LootContextParams.DAMAGE_SOURCE, new DamageSource(genericDamage, null, null));
         }
         // no tool in hand
         if (requiredParams.contains(LootContextParams.TOOL)) {
@@ -91,7 +91,7 @@ public class LootContextManager {
         while (true) {
             if (!pendingItems.containsKey(i)) {
                 pendingItems.put(i, entry);
-                LootTableNetwork.CHANNEL.sendToServer(new RequestItemFunctionSimulationPacket(i, stack, functions));
+                LootTableNetwork.sendToServer(new RequestItemFunctionSimulationPacket(i, stack, functions));
                 break;
             }
             i++;

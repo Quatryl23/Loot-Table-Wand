@@ -1,17 +1,15 @@
 package net.mesomods.lootwand.client.gui;
 
+import net.mesomods.lootwand.client.tooltip.AdvancedTooltipAbstractWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Consumer;
 
-@OnlyIn(Dist.CLIENT)
 public class LootTableSelectionList extends ObjectSelectionList<LootTableSelectionList.Entry> {
     private Consumer<Entry> onSelect;
 	public LootTableSelectionList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight, Consumer<Entry> onSelect) {
@@ -31,7 +29,7 @@ public class LootTableSelectionList extends ObjectSelectionList<LootTableSelecti
 
 	@Override
 	public void render(GuiGraphics graphics, int x, int y, float partialTick) {
-		graphics.fill(this.getLeft(), this.getTop(), this.getRight(), this.getBottom(), 0xB2000000);
+		graphics.fill(this.x0, this.y0, this.x1, this.y1, 0xB2000000);
 		super.render(graphics, x, y, partialTick);
 	}
 
@@ -65,11 +63,13 @@ public class LootTableSelectionList extends ObjectSelectionList<LootTableSelecti
 
 		@Override
 		public void render(GuiGraphics graphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isHovered, float partialTicks) {
-			widget.setX(left);
-			widget.setY(top);
-			widget.setWidth(width);
-			widget.setHeight(height);
-			widget.render(graphics, mouseX, mouseY, partialTicks);
+			if (widget instanceof AdvancedTooltipAbstractWidget w) {
+				widget.setX(left);
+				widget.setY(top);
+				widget.setWidth(width);
+				w.lootmod$setHeight(height);
+				widget.render(graphics, mouseX, mouseY, partialTicks);
+			}
 			if (isFolder)
 				renderFrame(graphics, top, left, top + height - 1, left + width - 5);
 		}

@@ -2,8 +2,7 @@ package net.mesomods.lootwand.loot.lifoc.parameters;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class DescriptionComponent extends Prefixable<DescriptionComponent> {
     public final Component component;

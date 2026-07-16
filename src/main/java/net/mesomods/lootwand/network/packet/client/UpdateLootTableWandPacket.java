@@ -1,16 +1,15 @@
 package net.mesomods.lootwand.network.packet.client;
 
-import net.mesomods.lootwand.LootWandMod;
+import net.mesomods.lootwand.ModItems;
 import net.mesomods.lootwand.item.LootTableWandItem;
 import net.mesomods.lootwand.network.packet.server.WandItemPreviewPacket;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class UpdateLootTableWandPacket {
     private final UpdateMode mode;
@@ -26,6 +25,7 @@ public class UpdateLootTableWandPacket {
         this.rl = rl;
         this.previewData = data;
 	}
+
     public UpdateLootTableWandPacket(int slot, int index, UpdateMode mode, @Nullable String rl) {
         this(slot, index, mode, rl, UpdatePreviewData.empty());
     }
@@ -66,43 +66,40 @@ public class UpdateLootTableWandPacket {
 		return new UpdateLootTableWandPacket(buf.readInt(), buf.readInt(), buf.readEnum(UpdateMode.class), buf.readOptional(FriendlyByteBuf::readUtf).orElse(null), UpdatePreviewData.decode(buf));
 	}
 
-	public static void handle(UpdateLootTableWandPacket packet, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> {
-            if (ctx.get().getDirection().getReceptionSide().isClient()) return;
-			Player player = ctx.get().getSender();
-			if (player != null) {
-				 ItemStack stack  = player.getInventory().getItem(packet.slot);
-                 if (stack.getItem() != LootWandMod.LOOT_TABLE_WAND.get()) return;
-                 switch (packet.mode) {
-                     case ACTIVATE_TABLE -> {
-                         LootTableWandItem.setActiveLootTableWandIndexServer(stack, packet.index, player, ctx.get());
-                     }
-                     case SET_TABLE -> {
-                         if (packet.rl == null) {
-                             LootTableWandItem.removeLootTable(player, stack, packet.index, false);
-                         } else {
-                             LootTableWandItem.setLootTable(player, stack, packet.index, packet.rl, false);
-                         }
-                         WandItemPreviewPacket.sendPreviewListUpdate(packet.slot, LootTableWandItem.getActiveLootTable(stack), ctx.get());
-                     }
-                     case REMOVE_TABLE -> {
-                         LootTableWandItem.removeLootTable(player, stack, packet.index, false);
-                         WandItemPreviewPacket.sendEmptyPreviewListUpdate(packet.slot, ctx.get());
-                     }
-                     case UPDATE_PREVIEW -> {
-                         LootTableWandItem.updatePreview(stack, packet.previewData);
-                     }
-                     case TOGGLE_DELETION_MODE -> {
-                        if (LootTableWandItem.toggleDeletionMode(player, stack, false)) {
-                            WandItemPreviewPacket.sendEmptyPreviewListUpdate(packet.slot, ctx.get());
-                        } else {
-                            WandItemPreviewPacket.sendPreviewListUpdate(packet.slot, LootTableWandItem.getActiveLootTable(stack), ctx.get());
+	public static void handle(UpdateLootTableWandPacket packet, MinecraftServer server, ServerPlayer player) {
+			server.execute(() -> {
+                if (player != null) {
+                    ItemStack stack  = player.getInventory().getItem(packet.slot);
+                    if (stack.getItem() != ModItems.LOOT_TABLE_WAND) return;
+                    switch (packet.mode) {
+                        case ACTIVATE_TABLE -> {
+                            LootTableWandItem.setActiveLootTableWandIndexServer(stack, packet.index, player);
                         }
-                     }
-                 }
-			}
-		});
-		ctx.get().setPacketHandled(true);
+                        case SET_TABLE -> {
+                            if (packet.rl == null) {
+                                LootTableWandItem.removeLootTable(player, stack, packet.index, false);
+                            } else {
+                                LootTableWandItem.setLootTable(player, stack, packet.index, packet.rl, false);
+                            }
+                            WandItemPreviewPacket.sendPreviewListUpdate(packet.slot, LootTableWandItem.getActiveLootTable(stack), player);
+                        }
+                        case REMOVE_TABLE -> {
+                            LootTableWandItem.removeLootTable(player, stack, packet.index, false);
+                            WandItemPreviewPacket.sendEmptyPreviewListUpdate(packet.slot, player);
+                        }
+                        case UPDATE_PREVIEW -> {
+                            LootTableWandItem.updatePreview(stack, packet.previewData);
+                        }
+                        case TOGGLE_DELETION_MODE -> {
+                            if (LootTableWandItem.toggleDeletionMode(player, stack, false)) {
+                                WandItemPreviewPacket.sendEmptyPreviewListUpdate(packet.slot, player);
+                            } else {
+                                WandItemPreviewPacket.sendPreviewListUpdate(packet.slot, LootTableWandItem.getActiveLootTable(stack), player);
+                            }
+                        }
+                    }
+                }
+            });
 	}
 
     public enum UpdateMode {

@@ -1,8 +1,8 @@
 package net.mesomods.lootwand.loot.lifoc.parameters;
 
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

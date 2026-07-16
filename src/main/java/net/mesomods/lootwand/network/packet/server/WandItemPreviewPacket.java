@@ -1,7 +1,7 @@
 package net.mesomods.lootwand.network.packet.server;
 
 import com.mojang.datafixers.util.Pair;
-import net.mesomods.lootwand.LootWandMod;
+import net.mesomods.lootwand.ModItems;
 import net.mesomods.lootwand.item.LootTableWandItem;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.mesomods.lootwand.util.PreviewItemCycleManager;
@@ -13,10 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 public class WandItemPreviewPacket extends ItemPreviewListPacket {
     private final int slot;
@@ -37,45 +33,35 @@ public class WandItemPreviewPacket extends ItemPreviewListPacket {
         return new WandItemPreviewPacket(slot, packet.times, packet.items);
     }
 
-    public static void handle(WandItemPreviewPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            if (ctx.get().getDirection().getReceptionSide().isServer()) return;
-            Player player = Minecraft.getInstance().player;
+    public static void handle(WandItemPreviewPacket packet, Minecraft mc) {
+        mc.execute(() -> {
+            Player player = mc.player;
             if (player != null) {
                 ItemStack stack = player.getInventory().getItem(packet.slot);
-                if (stack.getItem() != LootWandMod.LOOT_TABLE_WAND.get()) return;
+                if (stack.getItem() != ModItems.LOOT_TABLE_WAND) return;
                 LootTableWandItem.setPreviewList(stack, packet.times, packet.items);
             }
         });
-        ctx.get().setPacketHandled(true);
-    }
-
-    public static void sendEmptyPreviewListUpdate(int slot, NetworkEvent.Context context) {
-        sendEmptyPreviewListUpdate(slot, context.getSender());
     }
 
     public static void sendEmptyPreviewListUpdate(int slot, ServerPlayer player) {
         LootTableWandItem.setPreviewList(player.getInventory().getItem(slot), new int[0], new ListTag());
-        LootTableNetwork.CHANNEL.sendTo(new WandItemPreviewPacket(slot, new int[0], new ListTag()), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        LootTableNetwork.sendToClient(player, new WandItemPreviewPacket(slot, new int[0], new ListTag()));
     }
 
     public static void sendPreviewListUpdate(ServerPlayer player) {
         NonNullList<ItemStack> inventory = player.getInventory().items;
         inventory.forEach(item -> {
-            if (item.is(LootWandMod.LOOT_TABLE_WAND.get())) {
+            if (item.is(ModItems.LOOT_TABLE_WAND)) {
                 sendPreviewListUpdate(inventory.indexOf(item), LootTableWandItem.getActiveLootTable(item), player);
             }
         });
     }
 
-    public static void sendPreviewListUpdate(int slot, ResourceLocation lootTableLocation, NetworkEvent.Context context) {
-        sendPreviewListUpdate(slot, lootTableLocation, context.getSender());
-    }
-
     public static void sendPreviewListUpdate(int slot, ResourceLocation lootTableLocation, ServerPlayer player) {
         if (player == null) return;
         ItemStack wand = player.getInventory().getItem(slot);
-        if (wand.getItem() != LootWandMod.LOOT_TABLE_WAND.get()) return;
+        if (wand.getItem() != ModItems.LOOT_TABLE_WAND) return;
         Pair<int[], ListTag> previewList = PreviewItemCycleManager.getLootTablePreviewList(player, lootTableLocation);
 
         int[] previewTimes;
@@ -89,6 +75,6 @@ public class WandItemPreviewPacket extends ItemPreviewListPacket {
         }
 
         LootTableWandItem.setPreviewList(wand, previewTimes, previewItems);
-        LootTableNetwork.CHANNEL.sendTo(new WandItemPreviewPacket(slot, previewTimes, previewItems), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+        LootTableNetwork.sendToClient(player, new WandItemPreviewPacket(slot, previewTimes, previewItems));
     }
 }

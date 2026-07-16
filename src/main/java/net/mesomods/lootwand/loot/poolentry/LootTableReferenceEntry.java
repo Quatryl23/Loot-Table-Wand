@@ -1,6 +1,6 @@
 package net.mesomods.lootwand.loot.poolentry;
 
-import net.mesomods.lootwand.LootWandMod;
+import net.mesomods.lootwand.ModItems;
 import net.mesomods.lootwand.client.gui.LootTableViewMode;
 import net.mesomods.lootwand.client.gui.screen.LootTableDataScreen;
 import net.mesomods.lootwand.loot.lifoc.RenderedCondition;
@@ -12,19 +12,20 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
 public class LootTableReferenceEntry extends PreviewCycleSingletonEntry {
-    public static final ItemStack DEFAULT_SYMBOL = new ItemStack(LootWandMod.LOOT_TABLE_WAND.get());
+    public static final ItemStack DEFAULT_SYMBOL = new ItemStack(ModItems.LOOT_TABLE_WAND);
     public static final int HOVERED_COLOR = 0x4694ce;
     public ResourceLocation lootTable;
 
@@ -33,7 +34,7 @@ public class LootTableReferenceEntry extends PreviewCycleSingletonEntry {
         this.lootTable = lootTable;
         this.updateDescription();
         this.updateHeight(false);
-        LootTableNetwork.CHANNEL.sendToServer(new RequestPreviewListPacket(lootTable, false));
+        LootTableNetwork.sendToServer(new RequestPreviewListPacket(lootTable, false));
     }
 
     @Override
@@ -50,7 +51,7 @@ public class LootTableReferenceEntry extends PreviewCycleSingletonEntry {
     public void acceptPreviewList(ResourceLocation location, int[] previewTimes, ListTag previewItems, boolean isTag) {
         if (!isTag && location.equals(this.lootTable)) {
             this.previewTimes = previewTimes;
-            this.previewItems = previewItems.stream().map(tag -> ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(tag.getAsString()))).map(item -> item == null ? ItemStack.EMPTY : item.getDefaultInstance()).toList();
+            this.previewItems = previewItems.stream().map(tag -> BuiltInRegistries.ITEM.get(new ResourceLocation(tag.getAsString()))).map(Item::getDefaultInstance).toList();
             this.previewReady = true;
         }
     }

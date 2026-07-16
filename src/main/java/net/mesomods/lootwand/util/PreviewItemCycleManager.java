@@ -2,28 +2,24 @@ package net.mesomods.lootwand.util;
 
 import com.mojang.datafixers.util.Pair;
 import net.mesomods.lootwand.mixin.loot.LootPoolAccessor;
-import net.mesomods.lootwand.mixin.loot.LootTableAccessor;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITag;
-import net.minecraftforge.registries.tags.ITagManager;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PreviewItemCycleManager {
@@ -35,7 +31,7 @@ public class PreviewItemCycleManager {
         if (table == null) {
             return null;
         }
-        List<LootPool> pools = ((LootTableAccessor) table).getPools();
+        LootPool[] pools = table.pools;
         LootContext lootContext = new LootContext.Builder(LootContextManager.buildFakeParams(level, table, player)).create(null);
         List<Integer> previewTimes = new ArrayList<>();
         ListTag previewItems = new ListTag();
@@ -43,7 +39,7 @@ public class PreviewItemCycleManager {
         List<Integer> cumulativePoolRolls = new ArrayList<>();
         for (LootPool pool : pools) {
             int rollSum = cumulativePoolRolls.isEmpty() ? 0 : cumulativePoolRolls.get(cumulativePoolRolls.size() - 1);
-            cumulativePoolRolls.add(rollSum + pool.getRolls().getInt(lootContext));
+            cumulativePoolRolls.add(rollSum + pool.rolls.getInt(lootContext));
         }
         if (cumulativePoolRolls.isEmpty()) {
             return null;
@@ -61,7 +57,7 @@ public class PreviewItemCycleManager {
                 entryContainer.expand(lootContext, (entry) -> {
                     totalWeight.addAndGet(entry.getWeight(0));
                     entry.createItemStack((stack) -> {
-                        itemMap.put(totalWeight.get(), ForgeRegistries.ITEMS.getKey(stack.getItem()));
+                        itemMap.put(totalWeight.get(), BuiltInRegistries.ITEM.getKey(stack.getItem()));
                     }, lootContext);
                 });
             }
@@ -80,10 +76,9 @@ public class PreviewItemCycleManager {
     @Nullable
     public static Pair<int[], ListTag> getTagPreviewList(ServerPlayer player, ResourceLocation tagLocation) {
         if (player == null) return null;
-        ITagManager<Item> tagManager = ForgeRegistries.ITEMS.tags();
-        if (tagManager == null) return null;
-        ITag<Item> tag = tagManager.getTag(tagManager.createTagKey(tagLocation));
-        List<Item> items = tag.stream().toList();
+        Optional<HolderSet.Named<Item>> tag = BuiltInRegistries.ITEM.getTag(TagKey.create(BuiltInRegistries.ITEM.key(), tagLocation));
+        if (tag.isEmpty()) return null;
+        List<Item> items = tag.get().stream().map(Holder::value).toList();
         if (items.isEmpty()) return null;
         float ticksPerItem = (float) 1_000_000 / (float) items.size();
         List<Integer> previewTimes = new ArrayList<>();
@@ -92,12 +87,8 @@ public class PreviewItemCycleManager {
         for (Item item : items) {
             i++;
             previewTimes.add(Math.round(i * ticksPerItem));
-            ResourceLocation itemLocation = ForgeRegistries.ITEMS.getKey(item);
-            if (itemLocation == null) {
-                previewItems.add(StringTag.valueOf(ForgeRegistries.ITEMS.getKey(Items.AIR).toString()));
-            } else {
-                previewItems.add(StringTag.valueOf(itemLocation.toString()));
-            }
+            ResourceLocation itemLocation = BuiltInRegistries.ITEM.getKey(item);
+            previewItems.add(StringTag.valueOf(itemLocation.toString()));
         }
         return Pair.of(previewTimes.stream().mapToInt(Integer::intValue).toArray(), previewItems);
     }

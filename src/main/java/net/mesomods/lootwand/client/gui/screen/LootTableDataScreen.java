@@ -2,15 +2,14 @@ package net.mesomods.lootwand.client.gui.screen;
 
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import net.mesomods.lootwand.capabilities.LootTableWandPlayerDataManager;
-import net.mesomods.lootwand.capabilities.NumberProviderTooltipMode;
+import net.mesomods.lootwand.attachments.LootTableWandPlayerDataManager;
+import net.mesomods.lootwand.attachments.NumberProviderTooltipMode;
 import net.mesomods.lootwand.client.ScreenUtils;
 import net.mesomods.lootwand.client.gui.LootTableViewMode;
 import net.mesomods.lootwand.client.tooltip.MinYTooltipPositioner;
 import net.mesomods.lootwand.loot.RenderedCumulatedLootPool;
 import net.mesomods.lootwand.loot.RenderedLootTable;
 import net.mesomods.lootwand.mixin.gui.ImageButtonAccessor;
-import net.mesomods.lootwand.mixin.loot.LootTableAccessor;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.mesomods.lootwand.network.packet.client.RequestLootTableDataPacket;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,13 +23,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.loot.Deserializers;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
+import net.minecraft.world.level.storage.loot.LootTable;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-
-@OnlyIn(Dist.CLIENT)
 public class LootTableDataScreen extends Screen {
     protected Player player;
     public static final int LOOT_TABLE_Y0 = 20;
@@ -78,9 +73,9 @@ public class LootTableDataScreen extends Screen {
         if (luckSlider != null) {
             this.removeLuckSlider(luckSlider);
         }
-        LootTableNetwork.CHANNEL.sendToServer(new RequestLootTableDataPacket(location));
         lootTable = new RenderedLootTable(minecraft, this.width, this.height, LOOT_TABLE_Y0, this.height, location, viewMode);
-        closeButton = new HoverableImageButton(Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/close_screen_button.png"), ResourceLocation.parse("loot_table_wand:textures/gui/close_screen_button_hovered.png")),
+        LootTableNetwork.sendToServer(new RequestLootTableDataPacket(location));
+        closeButton = new HoverableImageButton(Pair.of(new ResourceLocation("loot_table_wand:textures/gui/close_screen_button.png"), new ResourceLocation("loot_table_wand:textures/gui/close_screen_button_hovered.png")),
                 b -> this.onClose(), TOOLTIP_CLOSE, 0, 2, 30, 16);
         viewModeToggle = new HoverableImageButton(getViewModeImages(), (button) -> {
             toggleViewMode();
@@ -112,7 +107,7 @@ public class LootTableDataScreen extends Screen {
     }
 
     public void initWithJson(JsonObject json) {
-        LootTableAccessor table = (LootTableAccessor) ForgeHooks.loadLootTable(Deserializers.createLootTableSerializer().create(), this.location, json, !this.location.getNamespace().equals("minecraft"));
+        LootTable table = Deserializers.createLootTableSerializer().create().fromJson(json, LootTable.class);
         this.lootTable.init(table);
         this.lootTable.toggleDefaultParameters(hideDefaults);
         this.lootTable.applyFunctionPreviewEffects(countPreview);
@@ -179,10 +174,10 @@ public class LootTableDataScreen extends Screen {
     public Pair<ResourceLocation, ResourceLocation> getViewModeImages() {
         switch (viewMode) {
             case RAW_LIST -> {
-                return Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/raw_list_mode.png"), ResourceLocation.parse("loot_table_wand:textures/gui/raw_list_mode_hovered.png"));
+                return Pair.of(new ResourceLocation("loot_table_wand:textures/gui/raw_list_mode.png"), new ResourceLocation("loot_table_wand:textures/gui/raw_list_mode_hovered.png"));
             }
             case LIST -> {
-                return Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/advanced_list_mode.png"), ResourceLocation.parse("loot_table_wand:textures/gui/advanced_list_mode_hovered.png"));
+                return Pair.of(new ResourceLocation("loot_table_wand:textures/gui/advanced_list_mode.png"), new ResourceLocation("loot_table_wand:textures/gui/advanced_list_mode_hovered.png"));
             }
             default -> {
                 return null;
@@ -193,13 +188,13 @@ public class LootTableDataScreen extends Screen {
     public Pair<ResourceLocation, ResourceLocation> getNumberProviderTooltipModeImages() {
         switch (numberProviderTooltipMode) {
             case ENABLED -> {
-                return Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/charts_enabled.png"), ResourceLocation.parse("loot_table_wand:textures/gui/charts_enabled_hovered.png"));
+                return Pair.of(new ResourceLocation("loot_table_wand:textures/gui/charts_enabled.png"), new ResourceLocation("loot_table_wand:textures/gui/charts_enabled_hovered.png"));
             }
             case UNIFORM_DISABLED -> {
-                return Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/charts_no_uniform.png"), ResourceLocation.parse("loot_table_wand:textures/gui/charts_no_uniform_hovered.png"));
+                return Pair.of(new ResourceLocation("loot_table_wand:textures/gui/charts_no_uniform.png"), new ResourceLocation("loot_table_wand:textures/gui/charts_no_uniform_hovered.png"));
             }
             case ALL_DISABLED -> {
-                return Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/charts_disabled.png"), ResourceLocation.parse("loot_table_wand:textures/gui/charts_disabled_hovered.png"));
+                return Pair.of(new ResourceLocation("loot_table_wand:textures/gui/charts_disabled.png"), new ResourceLocation("loot_table_wand:textures/gui/charts_disabled_hovered.png"));
             }
             default -> {
                 return null;
@@ -208,11 +203,11 @@ public class LootTableDataScreen extends Screen {
     }
 
     public Pair<ResourceLocation, ResourceLocation> getHideDefaultsImages() {
-        return hideDefaults ? Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/hide_defaults_true.png"), ResourceLocation.parse("loot_table_wand:textures/gui/hide_defaults_true_hovered.png")) : Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/hide_defaults_false.png"), ResourceLocation.parse("loot_table_wand:textures/gui/hide_defaults_false_hovered.png"));
+        return hideDefaults ? Pair.of(new ResourceLocation("loot_table_wand:textures/gui/hide_defaults_true.png"), new ResourceLocation("loot_table_wand:textures/gui/hide_defaults_true_hovered.png")) : Pair.of(new ResourceLocation("loot_table_wand:textures/gui/hide_defaults_false.png"), new ResourceLocation("loot_table_wand:textures/gui/hide_defaults_false_hovered.png"));
     }
 
     public Pair<ResourceLocation, ResourceLocation> getCountPreviewImages() {
-        return countPreview ? Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/count_preview_true.png"), ResourceLocation.parse("loot_table_wand:textures/gui/count_preview_true_hovered.png")) : Pair.of(ResourceLocation.parse("loot_table_wand:textures/gui/count_preview_false.png"), ResourceLocation.parse("loot_table_wand:textures/gui/count_preview_false_hovered.png"));
+        return countPreview ? Pair.of(new ResourceLocation("loot_table_wand:textures/gui/count_preview_true.png"), new ResourceLocation("loot_table_wand:textures/gui/count_preview_true_hovered.png")) : Pair.of(new ResourceLocation("loot_table_wand:textures/gui/count_preview_false.png"), new ResourceLocation("loot_table_wand:textures/gui/count_preview_false_hovered.png"));
     }
 
     public Tooltip getViewModeTooltip() {

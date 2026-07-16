@@ -5,9 +5,6 @@ import com.google.gson.JsonParser;
 import net.mesomods.lootwand.client.gui.screen.LootTableDataScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 public record ResponseLootTableDataPacket(JsonObject json) {
 
@@ -27,13 +24,12 @@ public record ResponseLootTableDataPacket(JsonObject json) {
         }
     }
 
-    public static void handle(ResponseLootTableDataPacket packet, Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            if (Minecraft.getInstance().screen instanceof LootTableDataScreen screen) {
+    public static void handle(ResponseLootTableDataPacket packet, Minecraft mc) {
+        mc.execute(() -> {
+            if (mc.screen instanceof LootTableDataScreen screen) {
                 screen.initWithJson(packet.json);
             }
         });
-        context.get().setPacketHandled(true);
     }
 
 

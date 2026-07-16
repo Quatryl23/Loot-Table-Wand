@@ -10,9 +10,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,7 +21,7 @@ public class VanillaRegistryParameter<T extends Registry<V>, V> extends SimplePa
     protected final T registry;
 
     public VanillaRegistryParameter(@Nullable V defaultValue, String description, T registry) {
-        this(defaultValue, description, registry, (v) -> Component.literal(registry.getKey(v).toString()));
+        this(defaultValue, description, registry, (v) -> getTypeDescription(v, value -> Component.literal(registry.getKey(value).toString())));
     }
 
     public VanillaRegistryParameter(@Nullable V defaultValue, String description, T registry, Function<V, Component> toComponent) {
@@ -47,8 +46,6 @@ public class VanillaRegistryParameter<T extends Registry<V>, V> extends SimplePa
             return block.getName();
         } else if (value instanceof Item item) {
             return item.getDescription();
-        } else if (value instanceof Fluid fluid) {
-            return fluid.getFluidType().getDescription();
         } else if (value instanceof MobEffect effect) {
             return Component.translatable(effect.getDescriptionId());
         } else if (value instanceof Potion potion) {
