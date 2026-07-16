@@ -1,6 +1,6 @@
 package net.mesomods.lootwand.util;
 
-import net.mesomods.lootwand.loot.poolentry.RenderedItemEntry;
+import net.mesomods.lootwand.client.gui.loottable.poolentry.RenderedItemEntry;
 import net.mesomods.lootwand.mixin.loot.function.FunctionReferenceAccessor;
 import net.mesomods.lootwand.mixin.loot.function.LootItemConditionalFunctionAccessor;
 import net.mesomods.lootwand.network.LootTableNetwork;

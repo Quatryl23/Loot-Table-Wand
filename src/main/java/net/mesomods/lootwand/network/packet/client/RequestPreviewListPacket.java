@@ -7,7 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * @param isTag true: tag, false: loot table
+ * @param isTag true: tag, false: loottable table
  */
 public record RequestPreviewListPacket(ResourceLocation target, boolean isTag) {
 

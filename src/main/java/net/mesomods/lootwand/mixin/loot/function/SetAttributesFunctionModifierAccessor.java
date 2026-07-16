@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.UUID;
 
-@org.spongepowered.asm.mixin.Mixin(targets = "net.minecraft.world.level.storage.loot.functions.SetAttributesFunction$Modifier")
+@org.spongepowered.asm.mixin.Mixin(targets = "net.minecraft.world.level.storage.loottable.functions.SetAttributesFunction$Modifier")
 public interface SetAttributesFunctionModifierAccessor {
     @Accessor
     String getName();

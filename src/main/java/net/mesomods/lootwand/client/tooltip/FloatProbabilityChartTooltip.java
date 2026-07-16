@@ -3,7 +3,7 @@ package net.mesomods.lootwand.client.tooltip;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
-import net.mesomods.lootwand.loot.numbers.NumberProvider;
+import net.mesomods.lootwand.client.gui.loottable.numbers.NumberProvider;
 
 public class FloatProbabilityChartTooltip extends ProbabilityChartTooltip {
     private final Int2IntMap graphPoints;
