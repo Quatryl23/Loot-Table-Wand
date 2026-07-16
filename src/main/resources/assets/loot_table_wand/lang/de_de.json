@@ -83,7 +83,7 @@
   "gui.loot_table_wand.condition.predicate.entity.sub.player.advancements.advancement.criterion.true": "Abgeschlossen",
   "gui.loot_table_wand.condition.predicate.entity.sub.player.advancements.advancement.done.false": "Nicht abgeschlossen",
   "gui.loot_table_wand.condition.predicate.entity.sub.player.advancements.advancement.done.true": "Abgeschlossen",
-  "gui.loot_table_wand.condition.predicate.entity.sub.player.game_type": "Sich im ##-Modus befindet",
+  "gui.loot_table_wand.condition.predicate.entity.sub.player.game_type": "Sich in diesem Spielmodus befindet:",
   "gui.loot_table_wand.condition.predicate.entity.sub.player.game_type.adventure": "Sich im Abenteuermodus befindet",
   "gui.loot_table_wand.condition.predicate.entity.sub.player.game_type.creative": "Sich im Kreativmodus befindet",
   "gui.loot_table_wand.condition.predicate.entity.sub.player.game_type.spectator": "Sich im Zuschauermodus befindet",
