@@ -10,6 +10,7 @@ import net.mesomods.lootwand.client.gui.loottable.lifoc.RenderedFunction;
 import net.mesomods.lootwand.client.gui.loottable.poolentry.RenderedCompositeEntry;
 import net.mesomods.lootwand.client.gui.screen.LootTableDataScreen;
 import net.mesomods.lootwand.client.tooltip.AdvancedTooltipScreen;
+import net.mesomods.lootwand.mixin.fabric.AbstractSliderButtonAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
