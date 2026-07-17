@@ -6,25 +6,25 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @org.spongepowered.asm.mixin.Mixin(net.minecraft.advancements.critereon.DistancePredicate.class)
 public interface DistancePredicateAccessor {
-    @Accessor
+    @Accessor("x")
     MinMaxBounds.Doubles getX();
 
     @Mutable
-    @Accessor
+    @Accessor("x")
     void setX(MinMaxBounds.Doubles x);
 
-    @Accessor
+    @Accessor("y")
     MinMaxBounds.Doubles getY();
 
     @Mutable
-    @Accessor
+    @Accessor("y")
     void setY(MinMaxBounds.Doubles y);
 
-    @Accessor
+    @Accessor("z")
     MinMaxBounds.Doubles getZ();
 
     @Mutable
-    @Accessor
+    @Accessor("z")
     void setZ(MinMaxBounds.Doubles z);
 
     @Accessor
