@@ -1,8 +1,8 @@
-| [Download on Modrinth](https://modrinth.com/mod/loot-table-wand) | [Download on Curseforge](https://www.curseforge.com/minecraft/mc-mods/loot-table-wand) |
-|------------------------------------------------------------------|----------------------------------------------------------------------------------------|
 
 ![loot_table_wand_banner.gif](images/loot_table_wand_banner.gif)
 # Loot Table Wand Mod
+| [Download on Modrinth](https://modrinth.com/mod/loot-table-wand) | [Download on Curseforge](https://www.curseforge.com/minecraft/mc-mods/loot-table-wand) |
+|------------------------------------------------------------------|----------------------------------------------------------------------------------------|
 ![Loot Table Wand](images/loot_table_wand.png)
 ### New operator tool: Loot Table Wand
 - Interact with container blocks like chests, barrels and shulker boxes
