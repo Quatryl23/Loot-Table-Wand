@@ -1,6 +1,7 @@
 package net.mesomods.lootwand.util;
 
 import com.mojang.datafixers.util.Pair;
+import net.mesomods.lootwand.client.gui.loottable.numbers.NumberProvider;
 import net.mesomods.lootwand.mixin.loot.LootPoolAccessor;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -39,7 +40,8 @@ public class PreviewItemCycleManager {
         List<Integer> cumulativePoolRolls = new ArrayList<>();
         for (LootPool pool : pools) {
             int rollSum = cumulativePoolRolls.isEmpty() ? 0 : cumulativePoolRolls.get(cumulativePoolRolls.size() - 1);
-            cumulativePoolRolls.add(rollSum + pool.rolls.getInt(lootContext));
+            NumberProvider rolls = NumberProvider.fromVanilla(pool.rolls);
+            cumulativePoolRolls.add(Math.round(rollSum + (rolls == null ? pool.rolls.getInt(lootContext) : rolls.getAverage())));
         }
         if (cumulativePoolRolls.isEmpty()) {
             return null;
@@ -55,8 +57,8 @@ public class PreviewItemCycleManager {
             HashMap<Integer, ResourceLocation> itemMap = new LinkedHashMap<>();
             for (LootPoolEntryContainer entryContainer : entries) {
                 entryContainer.expand(lootContext, (entry) -> {
-                    totalWeight.addAndGet(entry.getWeight(0));
                     entry.createItemStack((stack) -> {
+                        totalWeight.addAndGet(entry.getWeight(0));
                         itemMap.put(totalWeight.get(), BuiltInRegistries.ITEM.getKey(stack.getItem()));
                     }, lootContext);
                 });
@@ -69,6 +71,7 @@ public class PreviewItemCycleManager {
                 previewTimes.add(totalCycleTime + poolLocalPreviewTime);
                 previewItems.add(StringTag.valueOf(entry.getValue().toString()));
             }
+            totalCycleTime += cumulativePoolTicks[i];
         }
         return Pair.of(previewTimes.stream().mapToInt(Integer::intValue).toArray(), previewItems);
     }
