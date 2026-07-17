@@ -7,6 +7,7 @@ import net.mesomods.lootwand.client.tooltip.*;
 import net.mesomods.lootwand.item.LootTableWandItem;
 import net.mesomods.lootwand.network.LootTableNetwork;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
@@ -83,7 +84,7 @@ public class LootWandMod {
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS) event.accept(LOOT_TABLE_WAND);
+        if (event.getTabKey() == CreativeModeTabs.OP_BLOCKS && Minecraft.getInstance().options.operatorItemsTab().get()) event.accept(LOOT_TABLE_WAND);
     }
 
     public static void addProbabilityCalculation(Runnable calculation) {
