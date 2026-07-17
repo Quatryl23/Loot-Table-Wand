@@ -108,6 +108,7 @@ public class LootTableWandItem extends Item {
         if (player.isSecondaryUseActive()) return InteractionResult.PASS;
         ResourceLocation lootTable = entity.getLootTable();
         if (lootTable == null) return InteractionResult.SUCCESS;
+        if (getActiveLootTableIndex(wand) == -1) setActiveLootTableIndexClient(wand, 0, player);
         setLootTable(player, wand, getActiveLootTableIndex(wand), lootTable.toString(), true);
         return InteractionResult.SUCCESS;
     }
