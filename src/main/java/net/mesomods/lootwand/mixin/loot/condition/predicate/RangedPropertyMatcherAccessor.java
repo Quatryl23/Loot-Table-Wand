@@ -1,9 +1,10 @@
 package net.mesomods.lootwand.mixin.loot.condition.predicate;
 
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@org.spongepowered.asm.mixin.Mixin(targets = "net.minecraft.advancements.critereon.StatePropertiesPredicate$RangedPropertyMatcher")
+@org.spongepowered.asm.mixin.Mixin(StatePropertiesPredicate.RangedPropertyMatcher.class)
 public interface RangedPropertyMatcherAccessor {
     @Accessor
     String getMinValue();

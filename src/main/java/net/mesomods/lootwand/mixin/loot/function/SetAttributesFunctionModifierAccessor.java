@@ -3,13 +3,14 @@ package net.mesomods.lootwand.mixin.loot.function;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.level.storage.loot.functions.SetAttributesFunction;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.UUID;
 
-@org.spongepowered.asm.mixin.Mixin(targets = "net.minecraft.world.level.storage.loottable.functions.SetAttributesFunction$Modifier")
+@org.spongepowered.asm.mixin.Mixin(SetAttributesFunction.Modifier.class)
 public interface SetAttributesFunctionModifierAccessor {
     @Accessor
     String getName();
