@@ -19,7 +19,7 @@ public abstract class GuiMixin {
     @Shadow
     private int toolHighlightTimer;
 
-    @Inject(method = "tick()V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/Gui;toolHighlightTimer:I", opcode = Opcodes.PUTFIELD, ordinal = 2, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "tick()V", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/client/gui/Gui;toolHighlightTimer:I", ordinal = 1, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILSOFT)
     public void disableLootTableWandHighlighting(CallbackInfo ci, Entity entity, ItemStack itemStack) {
         if (itemStack.is(ModItems.LOOT_TABLE_WAND))
             toolHighlightTimer = 0;
