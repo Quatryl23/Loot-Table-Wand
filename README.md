@@ -1,5 +1,6 @@
 | [Download on Modrinth](https://modrinth.com/mod/loot-table-wand) | [Download on Curseforge](https://www.curseforge.com/minecraft/mc-mods/loot-table-wand) |
 |------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+
 ![loot_table_wand_banner.gif](images/loot_table_wand_banner.gif)
 # Loot Table Wand Mod
 ![Loot Table Wand](images/loot_table_wand.png)
