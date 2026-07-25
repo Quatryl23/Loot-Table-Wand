@@ -19,6 +19,8 @@ apply plugin: 'org.spongepowered.mixin'
 
 group = mod_group_id
 version = minecraft_version + "-" + modloader + "-" + mod_version
+pack_format = max_pack_format
+pack_format_range = "[" + min_pack_format + ", " + max_pack_format + "]"
 
 base {
     archivesName = mod_id
@@ -168,6 +170,7 @@ dependencies {
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [minecraft_version : minecraft_version, minecraft_version_range : minecraft_version_range,
                              pack_format       : pack_format,       pack_description        : pack_description,
+                             pack_format_range : pack_format_range,
                              forge_version     : forge_version,     forge_version_range     : forge_version_range,
                              mod_id            : mod_id,            mod_name                : mod_name,
                              mod_license       : mod_license,       mod_version             : version,
