@@ -9,7 +9,7 @@ version = minecraft_version + "-" + modloader + "-" + mod_version
 group = maven_group
 
 base {
-    archivesName = archives_base_name
+    archivesName = mod_id
 }
 
 repositories {
@@ -78,14 +78,14 @@ loom {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archives_base_name}" }
+        rename { "${it}_${mod_id}" }
     }
 }
 
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
+            artifactId = project.mod_id
             from components.java
         }
     }
