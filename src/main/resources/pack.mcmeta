@@ -1,6 +1,6 @@
 {
   "pack": {
-    "description": "Loot Table Wand mod resources",
-    "pack_format": 15
+    "description": "${pack_description}",
+    "pack_format": "${pack_format}"
   }
 }

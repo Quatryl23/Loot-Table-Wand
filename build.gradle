@@ -23,9 +23,10 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", mod_version
+    inputs.property "version", version
     inputs.property "minecraft_version", minecraft_version
-    inputs.property "loader_version", loader_version
+    inputs.property "pack_format", pack_format
+    inputs.property "pack_description", pack_description
     inputs.property "mod_id", mod_id
     inputs.property "mod_name", mod_name
     inputs.property "mod_authors", mod_authors
@@ -37,8 +38,10 @@ processResources {
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": mod_version,
+        expand "version": version,
                 "minecraft_version": minecraft_version,
+                "pack_format": pack_format,
+                "pack_description": pack_description,
                 "loader_version": loader_version,
                 "mod_id": mod_id,
                 "mod_name": mod_name,
