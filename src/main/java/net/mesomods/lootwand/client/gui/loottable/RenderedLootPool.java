@@ -63,7 +63,8 @@ public class RenderedLootPool extends RenderedLootTable.Pool implements LifocPar
     }
 
     public static RenderedLootPool fromVanilla(RenderedLootTable table, LootPoolAccessor pool, LootTableViewMode viewMode, float luck) {
-        return new RenderedLootPool(table, Arrays.stream(pool.getEntries()).map(entry -> Entry.fromVanilla(entry, false)).toList(), pool.getFunctions(), pool.getConditions(), NumberProvider.fromVanilla(pool.getRolls()), NumberProvider.fromVanilla(pool.getBonusRolls()), viewMode, luck);
+        net.fabricmc.fabric.mixin.loot.LootPoolAccessor fabricPool = (net.fabricmc.fabric.mixin.loot.LootPoolAccessor) pool;
+        return new RenderedLootPool(table, Arrays.stream(fabricPool.fabric_getEntries()).map(entry -> Entry.fromVanilla(entry, false)).toList(), fabricPool.fabric_getFunctions(), fabricPool.fabric_getConditions(), NumberProvider.fromVanilla(fabricPool.fabric_getRolls()), NumberProvider.fromVanilla(fabricPool.fabric_getBonusRolls()), viewMode, luck);
     }
 
     public void onEntryUpdate() {
